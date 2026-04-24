@@ -181,8 +181,6 @@ Abstracts identity across issuers but the "DID method" matrix is a sprawl of inc
 - **From OC Lock**: the envelope discipline, URL-fragment share links, one-signature UX, offline verifiability.
 - **From OrangeCheck**: the sats-bonded × days-unspent stake signal, composable via `@orangecheck/sdk#verify`.
 
-## Acknowledgements
-
-The "Bitcoin as identity, not access oracle" reframing that unblocks all of OC's sub-products, Stamp included, came out of long conversations with [**Bram Kanstein**](https://bramk.substack.com/). His research — Bitcoin as a sovereignty and identity substrate — produced the provocation that the right layer for durable web provenance is not a new x509 hierarchy, not a new timestamp chain, not a new keyserver, but the one the user already owns: a Bitcoin wallet. See also the OC Lock [`WHY.md`](https://github.com/orangecheck/oc-lock-protocol/blob/main/WHY.md) and [VISION.md](https://github.com/orangecheck/oc-web/blob/main/docs/oc-protocol/VISION.md) in the main site.
+## Closing note
 
 OC Stamp doesn't claim to be a clever protocol. It claims to be a composable one — one that ships what the open web has needed for a decade: **sign anything with your Bitcoin address, anchor the moment to Bitcoin, verify anywhere, forever.**

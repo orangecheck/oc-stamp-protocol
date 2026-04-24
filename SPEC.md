@@ -439,8 +439,6 @@ v1 explicitly does NOT solve:
 
 OC Stamp stands on the shoulders of [OpenTimestamps](https://opentimestamps.org) and credits **Peter Todd** and the OTS contributors unreservedly. OTS is the anchoring layer; we compose with it, we do not rebuild it.
 
-The "Bitcoin as identity, not access oracle" framing — which the entire OrangeCheck sub-product family (OrangeCheck, OC Lock, OC Vote, OC Stamp) inherits — came out of conversations with [**Bram Kanstein**](https://bramk.substack.com/). See the OC Lock [`WHY.md`](https://github.com/orangecheck/oc-lock-protocol/blob/main/WHY.md) for the fuller acknowledgement.
-
 ---
 
 End of specification.
