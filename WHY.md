@@ -1,6 +1,6 @@
 # Why OC Stamp exists
 
-> The short answer: **the web has no durable, permissionless, identity-bearing provenance primitive that a normal user can create with a wallet they already own.** Every adjacent system falls short on at least one of (authorship, priority, stake, openness, verifiability). OC Stamp exists to fill that gap by composing three primitives the OrangeCheck ecosystem already ships.
+> The short answer: **the open web has no durable, permissionless, identity-bearing provenance primitive that a normal user can create with a wallet they already own.** Every adjacent system falls short on at least one of (authorship, priority, stake, openness, verifiability). OC Stamp exists to fill that gap by composing three primitives the OrangeCheck ecosystem already ships.
 
 ## The gap
 
@@ -17,108 +17,172 @@ No single incumbent answers all four. Every candidate falls on at least one axis
 | C2PA / Content Credentials | ✓          | ✗                         | ✗            | x509 dependency   | ✗              |
 | Nostr kind-1 event         | ✓ (npub)   | ✗                         | ✗            | ~                 | ✓              |
 | EAS (Ethereum attestations)| ✓          | ✓ (Ethereum)              | token-gated  | ✗ (RPC needed)    | ✓              |
-| Sign-in-with-Ethereum +    |            |                           |              |                   |                |
-|  Arweave                   | ✓          | ✓ (Arweave)               | ✗            | ~                 | ✓              |
+| DID / VCs (W3C)            | ✓          | vendor-specific           | ✗            | vendor-specific   | ~              |
 | **OC Stamp**               | ✓ (BTC)    | ✓ (Bitcoin)               | ✓ (OC)       | ✓                 | ✓              |
 
-The five columns are not aesthetics. They're architectural load-bearing properties.
+The five columns are not aesthetics. They're architectural load-bearing properties. Authorship without identity binding means anyone can claim to be you. Priority without a chain anchor means you can't prove a document existed before a specific moment. Stake without an economic signal leaves the content-moderation / sybil-resistance axis unaddressed. Online-only verifiability means your protocol dies the day the vendor does. Permissioned issuance means you need a CA's permission to ship provenance — not the open web.
 
-- **Authorship without identity binding** → anyone can claim to be you. Bare hashes fail.
-- **Priority without a chain anchor** → you can't prove a document existed before a specific moment. Bare signatures fail.
-- **Stake without any economic signal** → the content-moderation / sybil-resistance axis is unaddressed. Pure crypto identities fail against farmed accounts.
-- **Online-only verifiability** → your protocol dies the day the vendor dies. C2PA dies if Adobe dies. EAS dies if a specific Ethereum RPC dies. OTS alone dies never.
-- **Permissioned issuance** → you need a CA's permission to ship provenance. Not the open web.
+## Load-bearing hypotheses
 
-## Why each adjacent primitive was insufficient
+Each hypothesis is a claim the design relies on. We state it, we try to break it, we record the verdict.
 
-### PGP
+### H1. Bitcoin addresses make better signer identities than any other public key the web has
 
-- Authorship is fine.
-- No priority anchor — you can sign a document claiming any date.
-- No stake — anyone can mint as many keys as they want.
-- Keyservers are a recurring security disaster (spam poisoning, key takeover, the SKS certificate debacle).
-- Two decades of evidence that non-cryptographers cannot manage keys. The only surviving niche is release signing, which `git-stamp` specifically aims to replace.
+**Claim.** A Bitcoin address is a hash of a public key the user already holds in a wallet they already own, already use for a thing they already value (custody of sats). Using it as a signing identity piggybacks on all the key-management discipline Bitcoin has already taught its users. No new keyserver, no new enrollment, no new trust anchor.
 
-### OpenTimestamps alone
+**Adversarial test.** What if the user doesn't own a Bitcoin wallet? Then OC Stamp isn't for them — they're not in our target audience. What if their wallet's BIP-322 implementation is buggy? Verifiers catch it at signature check; the envelope becomes worthless but nothing is silently compromised.
 
-- Priority is excellent. We depend on it and credit it.
-- No authorship — an OTS timestamp commits to a hash, not to a signer. Alice and Bob can both independently timestamp `H(x)` with no way to tell which of them produced `x`.
-- No stake.
-- OC Stamp's contribution is wrapping OTS with BIP-322 authorship and optional OrangeCheck stake context. **We are not rebuilding OTS. We compose with it.**
+**Verdict. KEPT.** The density of wallet users with BIP-322 support now exceeds the density of GPG-literate users by at least an order of magnitude and is growing.
 
-### C2PA / Content Credentials
+### H2. BIP-322 is a shippable signing primitive today
 
-- Authorship via x509, which means a CA has to issue your cert. That's the wrong architecture for independent bloggers, OSS commit signers, Nostr authors. It's the right architecture for Adobe → Nikon → NYT, and that's the lane C2PA is going to own. Fine. Different lane.
-- No chain anchor; revocation depends on CA-operated OCSP / CRLs.
-- No stake.
-- **The right framing for OC Stamp vs C2PA**: "C2PA proves a vendor vouches for your content; OC Stamp proves you signed it, with your Bitcoin address, anchored to Bitcoin."
+**Claim.** Every major Bitcoin wallet (UniSat, Xverse, Leather, Sparrow, Electrum, Alby, Coldcard) supports BIP-322 `signMessage` across all common address types (P2WPKH, P2TR, P2PKH, P2WSH). The protocol is MIT-licensed, has audited verifier libraries, and has been in production use by the OrangeCheck family for attestations since 2025.
 
-### Nostr kind-1 events
+**Adversarial test.** What about wallets that implement BIP-322 non-deterministically (ECDSA with random k)? The verifier still passes; only test vectors can't pin the signature byte string. Spec-side compensation: test vectors treat sig values as verify-only, not byte-identical.
 
-- Authorship via npub is fine for social context, but an npub has no economic layer and no canonical envelope.
-- No chain anchor.
-- Content drifts when relays purge old events; kind-1 events are not designed for durable provenance.
-- Fine for social, inadequate for "did this document exist before block N."
+**Verdict. KEPT.** BIP-322 is a solved problem for the ecosystem and improves every year.
 
-### EVM / smart-contract notarization (EAS, Arweave signing)
+### H3. OpenTimestamps is the correct anchoring layer and we should not rebuild it
 
-- Authorship ✓.
-- Priority ✓ — but anchored in a non-Bitcoin chain. That's a choice the ecosystem makes; OC Stamp is the Bitcoin-native answer.
-- Stake is token-gated (EAS issuers), which introduces a governance layer we explicitly don't want.
-- Verification requires an RPC. Offline verifiability is degraded.
-- Gas fees per stamp.
+**Claim.** OTS solves "prove this hash existed before block N" correctly. It batches submissions so individual users pay no fees. Its calendar operators are interchangeable (like Nostr relays). It has been in continuous production use since 2016. The spec is narrow and stable.
 
-### DID / Verifiable Credentials (W3C)
+**Adversarial test.** Could we build our own calendar network? Yes, and we would need to recruit independent operators, fund their node infrastructure, write proof-aggregation code, and solve the exact problem Peter Todd has already solved. "Not-invented-here" is not a design principle worth paying for.
 
-- Tries to abstract identity across issuers. In practice, the "DID method" matrix is a sprawl of incompatible resolvers; every VC stack picks a different one.
-- The "anchor" is vendor-specific per DID method. `did:btcr` exists but is moribund.
-- Stake is absent; VC issuers are trusted authorities, which is the opposite of what OC's economic-signal approach asks for.
+**Verdict. KEPT.** Compose, credit, do not rebuild.
+
+### H4. The envelope must be self-contained
+
+**Claim.** A stamp should carry everything needed to verify it: canonical message inputs, signature, OTS proof, declared stake. A verifier with an offline Bitcoin headers bundle and a BIP-322 verifier needs no network call.
+
+**Adversarial test.** What if the verifier needs to re-resolve `stake.attestation_id`? That's a separate step and requires network. Verifiers who don't care about stake can skip it; verifiers who do must pay the network cost once. The envelope is still "self-contained" in that no required field lives outside it.
+
+**Verdict. KEPT.** Offline-verifiability is non-negotiable.
+
+### H5. Stake must be declared in the signed canonical message *by reference*, not by value
+
+**Claim.** If the envelope declared `sats_bonded: 500000` in the canonical message and the attestation later became stale, the envelope would be a liar. Instead, the canonical message binds identity-at-signing-time via `signed_at`; `stake.attestation_id` inside the envelope points to an OrangeCheck attestation that the verifier can re-resolve. The declared numeric values are informational.
+
+**Adversarial test.** Can a signer attach the wrong attestation_id? Yes — but the verifier re-resolves and the mismatch is visible (different address, different sats, different age). Trust the chain, not the envelope's boasts.
+
+**Verdict. KEPT.** Stake is a re-resolvable pointer, not an embedded fact.
+
+### H6. Kind-30083 (not kind-30078) is the correct Nostr event kind for stamps
+
+**Claim.** kind-30078 is already claimed in the OrangeCheck family by OrangeCheck attestations and OC Lock device records. Reusing it would invite `d`-tag prefix collisions over time and would make relay queries ambiguous. kind-30083 is the next unused value in the family's 30078–30099 range and gives OC Stamp a clean namespace.
+
+**Adversarial test.** Does "unused" matter? Yes — Nostr relay clients increasingly index by kind + d-tag as a compound key. Isolating by kind prevents cross-protocol filter interference.
+
+**Verdict. KEPT.** Kind 30083.
+
+### H7. Signing the hex form of `id` beats signing raw bytes
+
+**Claim.** BIP-322 lets wallets preview the signed message to the user. If we sign the 32-byte raw id, the wallet shows gibberish. If we sign the 64-byte ASCII hex, the wallet shows something the user can read aloud. Legibility increases confidence and decreases the phishing surface ("why am I being asked to sign random bytes?").
+
+**Adversarial test.** Does the hex-vs-raw distinction matter cryptographically? No — either binds to the same content commitment. It is a UX choice; we pick legibility.
+
+**Verdict. KEPT.** Hex id over the wire for BIP-322; raw bytes only at the OTS calendar submission layer.
+
+### H8. Signing and anchoring must be decoupled
+
+**Claim.** If OTS calendars are down, the signer should still be able to sign. A signed-but-unanchored envelope is a legitimate artifact that any later client can upgrade. Coupling would introduce a liveness dependency into the critical path of the signing ceremony.
+
+**Adversarial test.** Does decoupling let an attacker present a "signed but never anchored" envelope as proof of priority? No — verifiers that require priority reject `ots === null` or `status === "pending"` per their policy (error code `E_NO_ANCHOR`). The spec clearly states priority is only asserted when `status === "confirmed"`.
+
+**Verdict. KEPT.** Sign now, anchor later.
+
+### H9. Aggregators are liveness-scoped, not authenticity-scoped
+
+**Claim.** An aggregator at stamp.ochk.io batches OTS submissions. Worst case: it refuses service or drops ids before submission. It cannot forge envelopes (no keys), cannot backdate (OTS won't let it), cannot strip stake context (baked into `id` via canonical message).
+
+**Adversarial test.** Could an aggregator correlate submissions to deanonymize users? Yes — submission time and IP are visible to the aggregator. Signers wanting anonymity should submit to calendars directly. This is a privacy-vs-convenience trade-off and we name it.
+
+**Verdict. KEPT.** Aggregators are infrastructure, not authorities.
+
+### H10. Content must be addressed by hash, not by URL
+
+**Claim.** The authoritative commitment is `content.hash`. `content.ref` is a pointer that may rot. Centering the protocol on the hash means moving content, replicating it, or losing its URL does not break stamps.
+
+**Adversarial test.** If the content is unreachable, can a verifier still say anything useful? Yes — the stamp still proves authorship, priority, and (optionally) stake for a hash. Whether the hash corresponds to still-reachable bytes is an orthogonal question.
+
+**Verdict. KEPT.** Hash-first, URL-second.
+
+### H11. Per-stamp BIP-322 signatures are cheap enough to not need batching at the signer
+
+**Claim.** BIP-322 signing is fast (<100ms for typical address types) and requires no on-chain interaction. One signature per stamp is the simplest model and does not create UX friction.
+
+**Adversarial test.** What about a signer stamping 10,000 items? They sign 10,000 times. An advanced v2 could define a "root stamp" that commits to a Merkle root of child hashes, amortizing to one BIP-322 signature. v1 does not ship this; use case not yet concrete.
+
+**Verdict. KEPT for v1. RETIRED (deferred to v2) for batched root stamps.**
+
+### H12. Ed25519 substitution test — does this work without Bitcoin?
+
+**Claim.** Strip BIP-322, strip OTS's Bitcoin anchor, strip the OrangeCheck stake signal. What remains? A signed JSON blob with a pointer to a keyserver lookup. In other words, PGP — an already-commoditized primitive we don't need to reinvent.
+
+**Adversarial test.** Which specific Bitcoin property is load-bearing?
+- **Authorship**: BIP-322 requires a Bitcoin address's private key. A different signature scheme (Ed25519) does not produce a Bitcoin-address-bound identity.
+- **Priority**: OTS anchors to Bitcoin block headers. Substituting Ethereum timestamping (per-stamp gas fee) or Certificate Transparency (operator-controlled, censorable) degrades the guarantee.
+- **Stake**: sats_bonded × days_unspent is an economic signal that only exists because Bitcoin's UTXO model exists. Ed25519 keys have no associated economic cost.
+
+**Verdict. KEPT.** All three legs are Bitcoin-load-bearing. Strip any and the system collapses.
+
+## Design rules that emerge
+
+1. **Compose, don't rebuild.** OTS for priority. Nostr for discovery. BIP-322 for authorship. OrangeCheck for stake.
+2. **One signing ceremony per stamp, forever.** No re-signing on upgrade, no re-signing on relay.
+3. **Envelopes are self-contained.** Transport is the user's choice.
+4. **Hash-first, URL-second.** Content.ref is a pointer, not a commitment.
+5. **Offline-verifiable.** Headers bundle + BIP-322 verifier + parser = full verify.
+6. **Liveness-scoped trust for infrastructure.** Aggregators cannot forge.
+7. **Named kinds, no overloading.** kind-30083 is ours; don't reuse family kinds.
+8. **Legibility over minimalism at the wallet boundary.** Hex > raw bytes for signed-message prompts.
+9. **Re-resolvable stake pointers.** Never trust the envelope's declared numbers — resolve the attestation.
+10. **Ship the API before the UI.** `stamp()` and `verify()` must work from a CLI before a web app ever renders.
+
+## What v1 explicitly does NOT solve
+
+- **Post-quantum authenticity.** secp256k1 and SHA-256 both have finite lifetimes against sufficiently large quantum computers.
+- **Multi-signer stamps.** One address per envelope in v1.
+- **Revocation semantics.** A "retract stamp" is publishable but not standardized.
+- **Confidential content.** For private content, compose with OC Lock.
+- **Anchor reorg handling.** v1 trusts OTS calendars to anchor at sufficient confirmation depth.
+- **Batched witness / root stamps.** Deferred to v2.
+
+## Why not each incumbent?
+
+### Why not PGP?
+
+Authorship is fine. No priority anchor — you can sign a document claiming any date. No stake. Keyservers have been a recurring security disaster (spam poisoning, key takeover, SKS certificate debacle). Two decades of evidence that non-cryptographers can't manage keys. The only surviving niche is release signing, which `git-stamp` aims to replace.
+
+### Why not OpenTimestamps alone?
+
+Priority is excellent — we depend on it. No authorship: an OTS timestamp commits to a hash, not to a signer. OC Stamp's contribution is wrapping OTS with BIP-322 authorship and optional OrangeCheck stake context. **We are not rebuilding OTS. We compose with it.**
+
+### Why not C2PA / Content Credentials?
+
+Authorship via x509, which requires a CA. Wrong architecture for independent bloggers, OSS commit signers, Nostr authors. Right architecture for Adobe → Nikon → NYT, and that's the lane C2PA will own. Different lane. The framing: "C2PA proves a vendor vouches for your content; OC Stamp proves you signed it, with your Bitcoin address, anchored to Bitcoin."
+
+### Why not Nostr kind-1 events?
+
+npubs are fine for social context but have no economic layer and no canonical envelope. No chain anchor. kind-1 events are not designed for durable provenance.
+
+### Why not EVM notarization (EAS, Arweave)?
+
+Authorship ✓. Priority ✓ — but anchored in a non-Bitcoin chain. Stake is token-gated (EAS issuers), which introduces a governance layer we explicitly don't want. Verification requires an RPC. Gas fees per stamp.
+
+### Why not DID / Verifiable Credentials (W3C)?
+
+Abstracts identity across issuers but the "DID method" matrix is a sprawl of incompatible resolvers. The "anchor" is vendor-specific per DID method. Stake is absent.
 
 ## What we kept from each
 
-- **From OpenTimestamps**: the entire anchoring layer, verbatim. Peter Todd's design is right.
-- **From PGP**: the "detached signature file alongside content" UX pattern. `.stamp` files are the `.asc` of the next generation.
-- **From C2PA**: the discipline of making the authenticity record self-describe the content it covers (hash, mime, length inline).
-- **From OC Lock**: the envelope discipline. Self-contained JSON. Canonical form. URL-fragment share links. One-signature UX. Offline verifiability.
-- **From OrangeCheck**: the sats-bonded × days-unspent stake signal, composable via `@orangecheck/sdk#verify`. Stamp declares it; any verifier can re-resolve.
+- **From OpenTimestamps**: the entire anchoring layer, verbatim.
+- **From PGP**: the "detached signature file alongside content" UX pattern. `.stamp` is the `.asc` of the next generation.
+- **From C2PA**: the discipline of making the authenticity record self-describe the content it covers.
+- **From OC Lock**: the envelope discipline, URL-fragment share links, one-signature UX, offline verifiability.
+- **From OrangeCheck**: the sats-bonded × days-unspent stake signal, composable via `@orangecheck/sdk#verify`.
 
-## What we explicitly discarded
+## Acknowledgements
 
-- **On-chain transactions for stamping.** Gone. No fee for the signer. OTS aggregation is Bitcoin-fee-free at the submitter side (calendars pay).
-- **Trusted authorities.** No CA, no issuer registry, no accredited notaries.
-- **Key rotation via CA revocation.** Bitcoin wallets don't have that primitive. If an address's key is compromised, the signer should migrate to a new address and stop signing with the old one; past stamps remain valid because the anchor commits to historical state.
-- **Proprietary signing formats.** BIP-322 only. Nothing to reimplement.
-- **Our own calendar / directory.** Stamp.ochk.io runs an aggregator for convenience, but it's a 100-line service anyone can replicate. The calendars are OTS calendars, the directories are Nostr relays. We don't add new infrastructure; we compose with what exists.
-
-## The design principles that survived
-
-1. **Compose, don't rebuild.** OTS for priority. Nostr for discovery. BIP-322 for authorship. OrangeCheck for stake. The protocol glue is small; the load-bearing systems are already battle-tested.
-2. **One signing ceremony per stamp.** BIP-322 once. Everything else is deterministic.
-3. **Offline-verifiable.** Given the envelope, a Bitcoin headers bundle, and a BIP-322 verifier, verification needs no network.
-4. **Standard, audited crypto only.** secp256k1 (via BIP-322), SHA-256, RFC 8785 JSON canonicalization. No hand-rolled primitives.
-5. **Self-contained envelopes.** Transport is user choice: URL fragment, email, IPFS, QR, Nostr, git, USB, paper.
-6. **Liveness-scoped trust for aggregators.** An aggregator can refuse service but cannot forge, backdate, or strip stake context.
-7. **If a feature works identically on Ed25519, it doesn't belong here.** The combination (BIP-322 + OTS Bitcoin anchor + OrangeCheck stake) is load-bearing on Bitcoin. Strip any one and the system collapses into an existing commoditized primitive. This is the discipline that prevents feature creep into "generic content-signing tool."
-
-## What we still don't have and what we'd do in v2
-
-- **Post-quantum readiness.** secp256k1 and SHA-256 both have finite lifetimes against sufficiently large quantum computers. A PQ variant would wrap `id` in a SLH-DSA or ML-DSA signature alongside the BIP-322 one. Not urgent; not shippable today without wallet upstream cooperation.
-- **Content confidentiality.** OC Stamp is public by construction. For stamps over private content, compose with OC Lock: seal the content with Lock, stamp the sealed envelope's hash with Stamp. The stamp is public; the content remains private; the authorship + priority + stake are all durable.
-- **Key rotation / multi-signer stamps.** v1 is single-signer. A multi-sig variant could bind `content.hash` to a 2-of-3 address, with the envelope carrying multiple `sig.value`s. Not complicated, not in v1 because the UX overhead isn't worth it until a concrete use case demands it.
-- **Revocation.** A signer can publish a revocation stamp (a stamp of the form "I retract stamp `id:X`"), but v1 doesn't standardize the semantics. Verifiers that care can subscribe to a revocation feed on Nostr.
-- **Batched witness stamps.** A stamp that attests to a Merkle root over many other stamps. Useful for an aggregator that wants to anchor thousands of user stamps with a single OTS submission. The math is trivial; the spec work is deferred.
-
-## References
-
-- [OpenTimestamps](https://opentimestamps.org) — Peter Todd et al. The anchoring layer. All credit.
-- [BIP-322](https://github.com/bitcoin/bips/blob/master/bip-0322.mediawiki) — Karl-Johan Alm. The signing primitive.
-- [OrangeCheck SPEC](https://ochk.io/docs/spec) — the identity + stake layer.
-- [OC Lock SPEC](https://github.com/orangecheck/oc-lock-protocol/blob/main/SPEC.md) — sibling sub-product. Same envelope discipline, different verb (private, not public).
-- [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785) — JSON Canonicalization Scheme.
-- [C2PA](https://c2pa.org) — the enterprise-media incumbent. Coexists cleanly with OC Stamp; different target audiences.
-
-## Inspiration
-
-The "Bitcoin as identity, not access oracle" reframing that unblocks all of OC's sub-products, Stamp included, came out of long conversations with [**Bram Kanstein**](https://bramk.substack.com/). His research — Bitcoin as a sovereignty and identity substrate — produced the provocation that the right layer for durable web provenance is not a new x509 hierarchy, not a new timestamp chain, not a new keyserver, but the one the user already owns: a Bitcoin wallet. See also the OC Lock [`WHY.md`](https://github.com/orangecheck/oc-lock-protocol/blob/main/WHY.md).
+The "Bitcoin as identity, not access oracle" reframing that unblocks all of OC's sub-products, Stamp included, came out of long conversations with [**Bram Kanstein**](https://bramk.substack.com/). His research — Bitcoin as a sovereignty and identity substrate — produced the provocation that the right layer for durable web provenance is not a new x509 hierarchy, not a new timestamp chain, not a new keyserver, but the one the user already owns: a Bitcoin wallet. See also the OC Lock [`WHY.md`](https://github.com/orangecheck/oc-lock-protocol/blob/main/WHY.md) and [VISION.md](https://github.com/orangecheck/oc-web/blob/main/docs/oc-protocol/VISION.md) in the main site.
 
 OC Stamp doesn't claim to be a clever protocol. It claims to be a composable one — one that ships what the open web has needed for a decade: **sign anything with your Bitcoin address, anchor the moment to Bitcoin, verify anywhere, forever.**

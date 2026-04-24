@@ -245,10 +245,10 @@ The reference aggregator at `stamp.ochk.io` is open-source and replaceable. A si
 
 ## 7. Nostr directory (optional)
 
-For durable public discovery, stamps MAY be published to Nostr as kind-30078 (addressable, replaceable) events:
+For durable public discovery, stamps MAY be published to Nostr as **kind-30083** (addressable, replaceable) events. Kind 30083 is claimed exclusively by this spec in the OrangeCheck family's 30078–30099 range (30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote).
 
 ```
-event.kind       = 30078
+event.kind       = 30083
 event.tags       = [
   ["d",        "oc-stamp:" || id],
   ["addr",     signer.address],
@@ -272,20 +272,20 @@ Clients SHOULD publish to at least three relays from a diverse set. The referenc
 
 By content hash:
 ```
-REQ { "kinds": [30078], "#hash": ["sha256:<hex>"] }
+REQ { "kinds": [30083], "#hash": ["sha256:<hex>"] }
 ```
 
 By signer address:
 ```
-REQ { "kinds": [30078], "#addr": ["bc1q…"] }
+REQ { "kinds": [30083], "#addr": ["bc1q…"] }
 ```
 
 By envelope id:
 ```
-REQ { "kinds": [30078], "#d": ["oc-stamp:<id>"] }
+REQ { "kinds": [30083], "#d": ["oc-stamp:<id>"] }
 ```
 
-The d-tag is content-addressed (`oc-stamp:<id>` where `id` is a hash of the canonical message). Kind-30078 is *addressable*: relays replace prior events with the same `(pubkey, kind, d-tag)` tuple. For OC Stamp this is harmless: a "replacement" with the same d-tag must carry the same id, hence the same signed content, or fail verification. A republish with the **same** id and an **upgraded** OTS proof is the common case — see §6.2.
+The d-tag is content-addressed (`oc-stamp:<id>` where `id` is a hash of the canonical message). Kind-30083 is *addressable*: relays replace prior events with the same `(pubkey, kind, d-tag)` tuple. For OC Stamp this is harmless: a "replacement" with the same d-tag must carry the same id, hence the same signed content, or fail verification. A republish with the **same** id and an **upgraded** OTS proof is the common case — see §6.2.
 
 ### 7.2 Republishing after upgrade
 
@@ -404,13 +404,38 @@ A client is OC Stamp v1 compliant if and only if:
 - [ ] Rejects unknown `v` values; preserves unknown fields on relay
 - [ ] Passes every committed test vector in [`test-vectors/`](./test-vectors/)
 
-## 13. IANA / external identifiers
+## 13. Registry for extensions
 
-- Nostr event kind: **30078** (addressable, general replaceable range). The `d` tag namespace `oc-stamp:*` is claimed by this spec.
+Fields with extensible values use a short registry documented here. Implementations that encounter an unknown value MUST NOT reject the envelope on that basis alone (unknown-field tolerance, §4.3); they MAY log a warning.
+
+| Field | Current values | Reserved for |
+|---|---|---|
+| `signer.alg` | `bip322` | Future: `bip340-schnorr-direct`, `pq-hybrid` |
+| `sig.alg` | `bip322` | Same as `signer.alg` |
+| `ots.status` | `pending`, `confirmed` | Future: `orphaned` (anchor block reorganized out) |
+| `content.ref` URI schemes | `ipfs://`, `ipns://`, `https://`, `http://`, `magnet:` | Any IANA-registered URI scheme |
+| `content.mime` | Any RFC 6838 media type | same |
+
+New values are allocated by PR to this spec. Vendor-specific experimental values SHOULD use a `x-vendor/` prefix until standardized.
+
+## 14. Future work (non-normative)
+
+v1 explicitly does NOT solve:
+
+- **Post-quantum authenticity.** secp256k1 breaks under a sufficiently large quantum computer. A v2 would add a SLH-DSA or ML-DSA signature alongside BIP-322.
+- **Multi-signer stamps.** One envelope signed by multiple Bitcoin addresses (e.g., m-of-n committee sign-off). Trivial to express as multiple `sig` entries; deferred until a concrete use case.
+- **Revocation semantics.** A signer can publish a "retract `id:X`" stamp, but v1 does not standardize how verifiers consume revocation feeds. Deferred.
+- **Confidential content.** Stamps are public by construction. For confidentiality, seal content with [OC Lock](https://github.com/orangecheck/oc-lock-protocol) and stamp the sealed envelope's hash. Compose, don't extend.
+- **Batched witness stamps.** Attest to a Merkle root over many other stamps for aggregator efficiency. The math is trivial; the spec work is deferred.
+- **Anchor-reorg handling.** If the anchor block at `ots.block_height` is reorganized out, the stamp loses its anchor and needs re-upgrade against the new chain tip. v1 trusts that the confirmation depth at upgrade time was sufficient (typically ≥6 blocks from the OTS calendar's perspective).
+
+## 15. IANA / external identifiers
+
+- Nostr event kind: **30083** (addressable, general replaceable range). Reserved exclusively for OC Stamp v1. The `d` tag namespace `oc-stamp:*` is claimed by this spec.
 - File extension: `.stamp`
 - MIME type: `application/vnd.oc-stamp+json` (self-allocated; not IANA-registered as of this writing).
 
-## 14. Acknowledgements
+## 16. Acknowledgements
 
 OC Stamp stands on the shoulders of [OpenTimestamps](https://opentimestamps.org) and credits **Peter Todd** and the OTS contributors unreservedly. OTS is the anchoring layer; we compose with it, we do not rebuild it.
 

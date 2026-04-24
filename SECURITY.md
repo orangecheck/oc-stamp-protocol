@@ -60,6 +60,42 @@ These are cryptographic correctness conditions that conforming implementations M
 - **Calendar liveness.** If every calendar submitted to is offline at upgrade time, the stamp is authored but not anchored until a client re-queries. Clients SHOULD submit to multiple independent calendars.
 - **No side-channel guarantees.** JavaScript crypto libraries (including `@noble/*`) make best-effort constant-time operations; a hostile host can time them anyway.
 
+## Attack scenarios
+
+Each scenario is labeled **Mitigated**, **Partially mitigated**, **Accepted**, or **Out of scope**.
+
+1. **Envelope tampering in transit.** An attacker modifies `content.hash`, `signer.address`, `signed_at`, or any field in the canonical domain. *Mitigated*: the envelope id is `H(canonical_message)` and is committed to by `sig.value`. Tampering fails signature verification.
+
+2. **Replay of a signature across canonical messages.** An attacker takes a BIP-322 signature from a different context and claims it covers an OC Stamp envelope. *Mitigated*: the canonical message begins with `oc-stamp:v1` as a domain separator. A signature over a non-oc-stamp message cannot verify against an oc-stamp id.
+
+3. **Replay of a canonical message with a different OTS proof.** An attacker publishes the same id with a fabricated OTS proof claiming an earlier block. *Mitigated*: verifiers parse the OTS proof and walk it to a real Bitcoin block header. Fabricated proofs fail header verification.
+
+4. **Calendar operator collusion with miner to backdate.** An OTS calendar colludes with a miner to include a fraudulent commitment in an older block. *Partially mitigated*: clients SHOULD submit to two or more independently-operated calendars (§6.1 of SPEC). Backdating requires colluding with a specific block's winner, which is adversarially infeasible for normal users but theoretically possible for resourced adversaries.
+
+5. **Aggregator substitutes a different envelope before OTS submission.** *Mitigated*: the envelope is signed by the signer before it reaches the aggregator; substitution produces a different id that fails the signer's BIP-322 check on any downstream verifier. The aggregator cannot sign.
+
+6. **Aggregator drops submissions.** The stamp is signed but never anchored. *Mitigated*: the signer can re-submit to any OTS calendar directly; submissions are idempotent (the OTS calendar aggregates the same id harmlessly).
+
+7. **OTS pending proof used as priority evidence.** A verifier accepts `status === "pending"` as proof of priority. *Mitigated*: SPEC §11.1 is explicit that priority is proven only by `status === "confirmed"` anchors. Error code `E_NO_ANCHOR` exists for policies that require confirmation.
+
+8. **Signer reuses `signed_at` across two stamps to confuse ordering.** *Mitigated*: `signed_at` is self-declared and not an ordering primitive. Ordering comes from `ots.block_height` of confirmed anchors; equal anchors fall back to the envelope id byte-order (verifiers that care about ordering should document their tiebreaker).
+
+9. **Signer signs a future `signed_at`.** The envelope claims to be signed in the future. *Accepted*: `signed_at` is the signer's claim. Verifiers that care about freshness should compare `signed_at` against their `now()` and reject envelopes that claim to be signed in the future of the verification clock. Out of scope for the envelope itself.
+
+10. **Signer leaks `signer.address` via an envelope they intended to keep private.** *Accepted*: stamps are public by construction. Signers who want to stamp confidentially should compose with OC Lock (seal the content with Lock, stamp the sealed hash with Stamp).
+
+11. **Content lookup via `content.ref` returns attacker-controlled bytes.** *Mitigated*: `content.ref` is a pointer, not a commitment. Verifiers who fetch via `ref` MUST re-hash and compare to `content.hash`; mismatch triggers `E_BAD_CONTENT`.
+
+12. **Key compromise of the signer's Bitcoin private key.** An attacker with the key can forge arbitrary stamps indistinguishable from legitimate ones. *Accepted*: this is the same trust model as BIP-322 everywhere. Key rotation to a new address is the mitigation; past stamps remain valid because the anchor commits to historical state.
+
+13. **BIP-322 verifier bug on exotic address types.** A verifier fails on P2TR, P2WSH, or legacy P2PKH inputs. *Partially mitigated*: SPEC §11.3 requires implementations pin a verifier known to handle all address types. CI conformance testing across verifiers is recommended.
+
+14. **Malicious Nostr relay returns a manipulated envelope.** *Mitigated*: verifiers re-derive `id` from the canonical message and re-check BIP-322. Manipulated envelopes fail verification regardless of relay.
+
+15. **Collision of SHA-256 used for `id` or `content.hash`.** *Accepted*: SHA-256 collision resistance is a load-bearing assumption. A practical collision attack would break far more than OC Stamp; no protocol-level mitigation is meaningful.
+
+16. **Side-channel leakage of BIP-322 signing.** A hostile host measures signing time to extract the private key. *Out of scope*: this is a wallet-implementation concern. OC Stamp assumes the signer's wallet is not hostile.
+
 ## Aggregator-specific risks
 
 An aggregator that accepts draft envelopes and batches OTS submissions is trusted for **liveness**, not for authenticity or priority:

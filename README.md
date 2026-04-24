@@ -51,7 +51,7 @@ A live implementation of OC Stamp v1 will run at **[stamp.ochk.io](https://stamp
 
 Every OC Stamp user has a Bitcoin address. To stamp something, the user computes the SHA-256 of the content, builds a short canonical message that binds (address, content hash, length, mime, signed-at) in a wallet-legible form, signs it once with BIP-322, and hashes the result into an OpenTimestamps calendar. Within about an hour, OTS upgrades the proof to a full Merkle path rooted in a Bitcoin block header. The final envelope — a self-contained JSON object — carries the canonical message, the BIP-322 signature, the OTS proof, and an optional reference to an OrangeCheck attestation describing the signer's stake at the moment of signing. Verification is a pure function of envelope plus Bitcoin block headers: no server, no lookup, no dependency on ochk.io.
 
-For durable public discovery, stamps MAY be published to Nostr as kind-30078 events with a `d` tag of `oc-stamp:<id>`. This is optional — the envelope is self-contained and can travel over any transport (URL fragment, email, IPFS, QR code, paper).
+For durable public discovery, stamps MAY be published to Nostr as kind-30083 events with a `d` tag of `oc-stamp:<id>`. This is optional — the envelope is self-contained and can travel over any transport (URL fragment, email, IPFS, QR code, paper).
 
 ## Layers
 
@@ -65,7 +65,7 @@ For durable public discovery, stamps MAY be published to Nostr as kind-30078 eve
 ├─────────────────────────────────────────────────────────────────┤
 │  OrangeCheck          stake signal (optional, stamp-embedded)   │
 │  OpenTimestamps       Bitcoin-block priority anchor             │
-│  Nostr                stamp directory (kind 30078, optional)    │
+│  Nostr                stamp directory (kind 30083, optional)    │
 │  Bitcoin              address ownership (BIP-322)               │
 └─────────────────────────────────────────────────────────────────┘
 ```
