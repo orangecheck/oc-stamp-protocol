@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — 2026-04
+
+### Reference SDK
+
+- `@orangecheck/stamp-core` **0.1.1** — non-breaking. Added `validateCanonicalInput(input)` that's called by `stamp()` before producing the canonical bytes, catching whitespace in addresses, non-hex content hashes, fractional lengths, and missing-Z signed_at values before they produce a signature nobody can verify. Added `hashContent(bytes)` helper. 60/60 tests green.
+
+### Spec
+
+- No protocol changes; v1.0.0 remains current. SPEC §3.1 and §4 already required the constraints the SDK now enforces at runtime.
+
+
 All notable changes to the OC Stamp protocol and reference SDK.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
