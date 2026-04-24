@@ -1,0 +1,42 @@
+{
+    "description": "single stamp, no stake, no ref, no OTS — canonical-message / id baseline",
+    "inputs": {
+        "address": "bc1qalice000000000000000000000000000000000",
+        "content_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "content_length": 42,
+        "content_mime": "text/plain",
+        "signed_at": "2026-04-24T18:30:00Z",
+        "content_ref": null,
+        "stake": null,
+        "ots": null,
+        "expected_sig_value": "ZmFrZS1zaWduYXR1cmU="
+    },
+    "expected": {
+        "canonical_message": "oc-stamp:v1\naddress: bc1qalice000000000000000000000000000000000\ncontent_hash: sha256:1111111111111111111111111111111111111111111111111111111111111111\ncontent_length: 42\ncontent_mime: text/plain\nsigned_at: 2026-04-24T18:30:00Z",
+        "canonical_message_bytes_len": 225,
+        "id": "ad30c983dfc872a8c53cd70eb4d84e1869967a4b8433586beec7ba468b03c3de",
+        "envelope": {
+            "v": 1,
+            "kind": "stamp",
+            "id": "ad30c983dfc872a8c53cd70eb4d84e1869967a4b8433586beec7ba468b03c3de",
+            "content": {
+                "hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+                "length": 42,
+                "mime": "text/plain",
+                "ref": null
+            },
+            "signer": {
+                "address": "bc1qalice000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "signed_at": "2026-04-24T18:30:00Z",
+            "stake": null,
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qalice000000000000000000000000000000000",
+                "value": "ZmFrZS1zaWduYXR1cmU="
+            }
+        }
+    }
+}

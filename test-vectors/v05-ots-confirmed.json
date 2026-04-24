@@ -1,0 +1,60 @@
+{
+    "description": "stamp with a confirmed OTS proof upgraded to a fixtured Bitcoin block",
+    "inputs": {
+        "address": "bc1qnotary00000000000000000000000000000000",
+        "content_hash": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+        "content_length": 65536,
+        "content_mime": "application/x-git-tree",
+        "signed_at": "2026-04-20T12:00:00Z",
+        "content_ref": null,
+        "stake": null,
+        "ots": {
+            "status": "confirmed",
+            "proof": "AE9wZW5UaW1lc3RhbXBzAABDb25maXJtZWQtRml4dHVyZS1ibG9jay04OTAxMjMtbm90LWEtcmVhbC1wcm9vZg==",
+            "calendars": [
+                "https://alice.btc.calendar.opentimestamps.org"
+            ],
+            "block_height": 890123,
+            "block_hash": "0000000000000000000156dc3a3e3f9c61e7a8b9c0d1e2f3a4b5c6d7e8f9a0b1",
+            "upgraded_at": "2026-04-20T13:07:14Z"
+        },
+        "expected_sig_value": "ZmFrZS1zaWduYXR1cmU="
+    },
+    "expected": {
+        "canonical_message": "oc-stamp:v1\naddress: bc1qnotary00000000000000000000000000000000\ncontent_hash: sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210\ncontent_length: 65536\ncontent_mime: application/x-git-tree\nsigned_at: 2026-04-20T12:00:00Z",
+        "canonical_message_bytes_len": 240,
+        "id": "86020d78db788237fd13be8af76563f53ea0d0b2a81d188baacaa4d1a85eeb1c",
+        "envelope": {
+            "v": 1,
+            "kind": "stamp",
+            "id": "86020d78db788237fd13be8af76563f53ea0d0b2a81d188baacaa4d1a85eeb1c",
+            "content": {
+                "hash": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+                "length": 65536,
+                "mime": "application/x-git-tree",
+                "ref": null
+            },
+            "signer": {
+                "address": "bc1qnotary00000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "signed_at": "2026-04-20T12:00:00Z",
+            "stake": null,
+            "ots": {
+                "status": "confirmed",
+                "proof": "AE9wZW5UaW1lc3RhbXBzAABDb25maXJtZWQtRml4dHVyZS1ibG9jay04OTAxMjMtbm90LWEtcmVhbC1wcm9vZg==",
+                "calendars": [
+                    "https://alice.btc.calendar.opentimestamps.org"
+                ],
+                "block_height": 890123,
+                "block_hash": "0000000000000000000156dc3a3e3f9c61e7a8b9c0d1e2f3a4b5c6d7e8f9a0b1",
+                "upgraded_at": "2026-04-20T13:07:14Z"
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qnotary00000000000000000000000000000000",
+                "value": "ZmFrZS1zaWduYXR1cmU="
+            }
+        }
+    }
+}

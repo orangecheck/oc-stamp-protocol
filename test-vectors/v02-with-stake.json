@@ -1,0 +1,50 @@
+{
+    "description": "stamp with OrangeCheck stake reference embedded",
+    "inputs": {
+        "address": "bc1qcreator00000000000000000000000000000000",
+        "content_hash": "sha256:a4c8f7d2b3e1e09a8c5b6d7f4e3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a",
+        "content_length": 12843,
+        "content_mime": "text/markdown",
+        "signed_at": "2026-04-24T18:30:00Z",
+        "content_ref": null,
+        "stake": {
+            "attestation_id": "9e3f4a2b1c0d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f",
+            "sats_bonded": 500000,
+            "days_unspent": 180
+        },
+        "ots": null,
+        "expected_sig_value": "ZmFrZS1zaWduYXR1cmU="
+    },
+    "expected": {
+        "canonical_message": "oc-stamp:v1\naddress: bc1qcreator00000000000000000000000000000000\ncontent_hash: sha256:a4c8f7d2b3e1e09a8c5b6d7f4e3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a\ncontent_length: 12843\ncontent_mime: text/markdown\nsigned_at: 2026-04-24T18:30:00Z",
+        "canonical_message_bytes_len": 232,
+        "id": "f0dd79a528ab2c756c1ba1aa5f350c4fdd1073e90ae447bd9438f6a7794e1485",
+        "envelope": {
+            "v": 1,
+            "kind": "stamp",
+            "id": "f0dd79a528ab2c756c1ba1aa5f350c4fdd1073e90ae447bd9438f6a7794e1485",
+            "content": {
+                "hash": "sha256:a4c8f7d2b3e1e09a8c5b6d7f4e3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a",
+                "length": 12843,
+                "mime": "text/markdown",
+                "ref": null
+            },
+            "signer": {
+                "address": "bc1qcreator00000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "signed_at": "2026-04-24T18:30:00Z",
+            "stake": {
+                "attestation_id": "9e3f4a2b1c0d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f",
+                "sats_bonded": 500000,
+                "days_unspent": 180
+            },
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qcreator00000000000000000000000000000000",
+                "value": "ZmFrZS1zaWduYXR1cmU="
+            }
+        }
+    }
+}

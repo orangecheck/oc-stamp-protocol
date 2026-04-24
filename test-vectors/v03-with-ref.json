@@ -1,0 +1,42 @@
+{
+    "description": "stamp with IPFS content.ref — pointer, not binding",
+    "inputs": {
+        "address": "bc1qpublisher00000000000000000000000000000000",
+        "content_hash": "sha256:deadbeefcafebabe1234567890abcdef1234567890abcdef1234567890abcdef",
+        "content_length": 2048576,
+        "content_mime": "application/pdf",
+        "signed_at": "2026-04-24T18:30:00Z",
+        "content_ref": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+        "stake": null,
+        "ots": null,
+        "expected_sig_value": "ZmFrZS1zaWduYXR1cmU="
+    },
+    "expected": {
+        "canonical_message": "oc-stamp:v1\naddress: bc1qpublisher00000000000000000000000000000000\ncontent_hash: sha256:deadbeefcafebabe1234567890abcdef1234567890abcdef1234567890abcdef\ncontent_length: 2048576\ncontent_mime: application/pdf\nsigned_at: 2026-04-24T18:30:00Z",
+        "canonical_message_bytes_len": 238,
+        "id": "c77f9052e8a9d7184d357bfa4f81bd431a7219c48522d48d259dbdc564382ee7",
+        "envelope": {
+            "v": 1,
+            "kind": "stamp",
+            "id": "c77f9052e8a9d7184d357bfa4f81bd431a7219c48522d48d259dbdc564382ee7",
+            "content": {
+                "hash": "sha256:deadbeefcafebabe1234567890abcdef1234567890abcdef1234567890abcdef",
+                "length": 2048576,
+                "mime": "application/pdf",
+                "ref": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+            },
+            "signer": {
+                "address": "bc1qpublisher00000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "signed_at": "2026-04-24T18:30:00Z",
+            "stake": null,
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qpublisher00000000000000000000000000000000",
+                "value": "ZmFrZS1zaWduYXR1cmU="
+            }
+        }
+    }
+}

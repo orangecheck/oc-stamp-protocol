@@ -1,0 +1,62 @@
+{
+    "description": "stamp with a pending OTS proof — anchored to calendar but not yet to Bitcoin",
+    "inputs": {
+        "address": "bc1qsigner00000000000000000000000000000000",
+        "content_hash": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "content_length": 1024,
+        "content_mime": "application/json",
+        "signed_at": "2026-04-24T18:30:00Z",
+        "content_ref": null,
+        "stake": null,
+        "ots": {
+            "status": "pending",
+            "proof": "AE9wZW5UaW1lc3RhbXBzAABQZW5kaW5nLUZpeHR1cmUtMS1ub3QtYS1yZWFsLXByb29m",
+            "calendars": [
+                "https://alice.btc.calendar.opentimestamps.org",
+                "https://bob.btc.calendar.opentimestamps.org"
+            ],
+            "block_height": null,
+            "block_hash": null,
+            "upgraded_at": null
+        },
+        "expected_sig_value": "ZmFrZS1zaWduYXR1cmU="
+    },
+    "expected": {
+        "canonical_message": "oc-stamp:v1\naddress: bc1qsigner00000000000000000000000000000000\ncontent_hash: sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\ncontent_length: 1024\ncontent_mime: application/json\nsigned_at: 2026-04-24T18:30:00Z",
+        "canonical_message_bytes_len": 233,
+        "id": "796ee13020508d5949820638d18e3a6b0db4ecf5a167166fb0d61fa9efce0aa9",
+        "envelope": {
+            "v": 1,
+            "kind": "stamp",
+            "id": "796ee13020508d5949820638d18e3a6b0db4ecf5a167166fb0d61fa9efce0aa9",
+            "content": {
+                "hash": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                "length": 1024,
+                "mime": "application/json",
+                "ref": null
+            },
+            "signer": {
+                "address": "bc1qsigner00000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "signed_at": "2026-04-24T18:30:00Z",
+            "stake": null,
+            "ots": {
+                "status": "pending",
+                "proof": "AE9wZW5UaW1lc3RhbXBzAABQZW5kaW5nLUZpeHR1cmUtMS1ub3QtYS1yZWFsLXByb29m",
+                "calendars": [
+                    "https://alice.btc.calendar.opentimestamps.org",
+                    "https://bob.btc.calendar.opentimestamps.org"
+                ],
+                "block_height": null,
+                "block_hash": null,
+                "upgraded_at": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qsigner00000000000000000000000000000000",
+                "value": "ZmFrZS1zaWduYXR1cmU="
+            }
+        }
+    }
+}
