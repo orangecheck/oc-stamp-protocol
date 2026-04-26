@@ -215,4 +215,4 @@ Remove any one and the result is a commoditized primitive. Keep all three — an
 - Read [SPEC.md](./SPEC.md) for normative encoding rules.
 - Read [WHY.md](./WHY.md) for the design rationale and why each adjacent primitive was insufficient.
 - See [`@orangecheck/stamp-core`](https://github.com/orangecheck/oc-packages/tree/main/stamp-core) for the reference TypeScript implementation.
-- Try the web client: [`orangecheck/oc-stamp-web`](https://github.com/orangecheck/oc-stamp-web).
+- Try the hosted web client at [stamp.ochk.io](https://stamp.ochk.io).

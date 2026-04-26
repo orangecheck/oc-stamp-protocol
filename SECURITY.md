@@ -13,7 +13,7 @@ We aim to acknowledge within 48 hours and publish a fix for high/critical issues
 
 ## Scope
 
-This document covers the **OC Stamp v1 protocol specification** in this repository. The reference implementation lives in [`orangecheck/oc-packages`](https://github.com/orangecheck/oc-packages); the web client lives in [`orangecheck/oc-stamp-web`](https://github.com/orangecheck/oc-stamp-web). Each of those has its own `SECURITY.md`.
+This document covers the **OC Stamp v1 protocol specification** in this repository. The reference implementation lives in [`orangecheck/oc-packages`](https://github.com/orangecheck/oc-packages) and has its own `SECURITY.md`. The hosted reference web client at [stamp.ochk.io](https://stamp.ochk.io) is closed-source; report web-client security issues via `security@ochk.io`.
 
 ## Threat model
 

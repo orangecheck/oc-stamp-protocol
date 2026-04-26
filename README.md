@@ -45,7 +45,7 @@ The [`test-vectors/`](./test-vectors/) directory holds cross-implementation conf
 
 ## Reference web client
 
-A live implementation of OC Stamp v1 will run at **[stamp.ochk.io](https://stamp.ochk.io)**. Source: [`orangecheck/oc-stamp-web`](https://github.com/orangecheck/oc-stamp-web).
+A live reference implementation of OC Stamp v1 runs at **[stamp.ochk.io](https://stamp.ochk.io)** (closed-source web client; the underlying protocol implementation is published as [`@orangecheck/stamp-*`](https://www.npmjs.com/org/orangecheck) on npm).
 
 ## How it works (one paragraph)
 
@@ -57,7 +57,7 @@ For durable public discovery, stamps MAY be published to Nostr as kind-30083 eve
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  oc-stamp-web            create / verify / open UI              │
+│  stamp.ochk.io           create / verify / open UI              │
 │  git-stamp               CLI plugin for commit/tag signing      │
 ├─────────────────────────────────────────────────────────────────┤
 │  @orangecheck/stamp-core    canonical msg, envelope, verify     │
@@ -73,9 +73,9 @@ For durable public discovery, stamps MAY be published to Nostr as kind-30083 eve
 ## Related repositories
 
 - [`orangecheck/oc-packages`](https://github.com/orangecheck/oc-packages) — the `@orangecheck/stamp-*` packages live here, alongside the rest of the OrangeCheck SDK.
-- [`orangecheck/oc-stamp-web`](https://github.com/orangecheck/oc-stamp-web) — reference web client.
+- [stamp.ochk.io](https://stamp.ochk.io) — hosted reference web client (closed-source).
 - [`orangecheck/oc-lock-protocol`](https://github.com/orangecheck/oc-lock-protocol) — sibling sub-product: private envelopes addressed to a Bitcoin address.
-- [`orangecheck/oc-web`](https://github.com/orangecheck/oc-web) — OrangeCheck site.
+- [ochk.io](https://ochk.io) — OrangeCheck umbrella site.
 
 ## Status
 
