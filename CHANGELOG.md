@@ -26,7 +26,7 @@ Initial public release.
 - Canonical message format (§3 of SPEC) — `oc-stamp:v1` domain-separated, BIP-322 signable, wallet-legible.
 - Self-contained `.stamp` envelope format (§4).
 - OpenTimestamps integration with pending → confirmed upgrade path (§6).
-- Optional Nostr kind-30078 directory with `oc-stamp:<id>` d-tag namespace (§7).
+- Optional Nostr kind-30083 directory with `oc-stamp:<id>` d-tag namespace (§7). _(Earlier release notes referenced kind-30078; that was a typo. The spec and reference SDK have always shipped on kind-30083.)_
 - Full verification algorithm with 7 error codes (§8, §10).
 - Optional stake context via OrangeCheck attestation reference (§2).
 - RFC 8785 JSON canonicalization (§5).
