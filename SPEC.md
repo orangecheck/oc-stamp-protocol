@@ -245,7 +245,16 @@ The reference aggregator at `stamp.ochk.io` is open-source and replaceable. A si
 
 ## 7. Nostr directory (optional)
 
-For durable public discovery, stamps MAY be published to Nostr as **kind-30083** (addressable, replaceable) events. Kind 30083 is claimed exclusively by this spec in the OrangeCheck family's 30078–30099 range (30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote).
+For durable public discovery, stamps MAY be published to Nostr as **kind-30083** (addressable, replaceable) events.
+
+Kind 30083 is **co-claimed** with [OC Agent](https://github.com/orangecheck/oc-agent-protocol) within the OrangeCheck family's 30078–30099 range. OC Stamp publishes stamp envelopes; OC Agent publishes delegation envelopes. The two are unambiguously distinguished by the `d` tag namespace:
+
+| Sub-protocol | `d` tag prefix | Envelope `kind` field |
+|---|---|---|
+| OC Stamp | `oc-stamp:<id>` | `stamp` |
+| OC Agent (delegation) | `oc-agent-del:<id>` | `agent-delegation` |
+
+A verifier that only handles stamps MUST filter Nostr queries by `#d` (e.g., `["oc-stamp:"]` prefix match) or by the envelope's `kind` field after fetching. Querying kind 30083 alone will return both stamp and agent-delegation events. Other family kinds in this range: 30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote, 30084 = OC Stamp / OC Agent shared action transport, 30085 = OC Agent revocation.
 
 ```
 event.kind       = 30083
@@ -431,7 +440,7 @@ v1 explicitly does NOT solve:
 
 ## 15. IANA / external identifiers
 
-- Nostr event kind: **30083** (addressable, general replaceable range). Reserved exclusively for OC Stamp v1. The `d` tag namespace `oc-stamp:*` is claimed by this spec.
+- Nostr event kind: **30083** (addressable, general replaceable range). Co-claimed with OC Agent (delegations); the `d` tag namespace `oc-stamp:*` is claimed by this spec, while `oc-agent-del:*` is claimed by OC Agent. See §7 for verifier disambiguation rules.
 - File extension: `.stamp`
 - MIME type: `application/vnd.oc-stamp+json` (self-allocated; not IANA-registered as of this writing).
 

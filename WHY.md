@@ -68,11 +68,13 @@ Each hypothesis is a claim the design relies on. We state it, we try to break it
 
 ### H6. Kind-30083 (not kind-30078) is the correct Nostr event kind for stamps
 
-**Claim.** kind-30078 is already claimed in the OrangeCheck family by OrangeCheck attestations and OC Lock device records. Reusing it would invite `d`-tag prefix collisions over time and would make relay queries ambiguous. kind-30083 is the next unused value in the family's 30078–30099 range and gives OC Stamp a clean namespace.
+**Claim.** kind-30078 is already claimed in the OrangeCheck family by OrangeCheck attestations and OC Lock device records. Reusing it would invite `d`-tag prefix collisions over time and would make relay queries ambiguous. kind-30083 was the next unused value in the family's 30078–30099 range when OC Stamp v1 shipped.
 
-**Adversarial test.** Does "unused" matter? Yes — Nostr relay clients increasingly index by kind + d-tag as a compound key. Isolating by kind prevents cross-protocol filter interference.
+**Adversarial test.** Does "unused" matter? Yes — Nostr relay clients increasingly index by kind + d-tag as a compound key. Isolating by kind reduces cross-protocol filter interference.
 
-**Verdict. KEPT.** Kind 30083.
+**Verdict. KEPT.** Kind 30083, with the `oc-stamp:` `d`-tag namespace.
+
+> **Note (post-v1).** OC Agent v1 (2026-04) subsequently claimed kind 30083 for delegation envelopes under the disjoint `d`-tag namespace `oc-agent-del:`. The two sub-protocols share the kind without collision because (a) `d`-tag prefixes are disjoint, and (b) each envelope carries an internal `kind` field (`stamp` vs `agent-delegation`) that any verifier reads after fetching. Verifiers MUST filter by `#d` prefix or by envelope `kind` — querying kind 30083 alone returns both event types. See SPEC §7.
 
 ### H7. Signing the hex form of `id` beats signing raw bytes
 
@@ -133,7 +135,7 @@ Each hypothesis is a claim the design relies on. We state it, we try to break it
 4. **Hash-first, URL-second.** Content.ref is a pointer, not a commitment.
 5. **Offline-verifiable.** Headers bundle + BIP-322 verifier + parser = full verify.
 6. **Liveness-scoped trust for infrastructure.** Aggregators cannot forge.
-7. **Named kinds, no overloading.** kind-30083 is ours; don't reuse family kinds.
+7. **Named kinds, namespaced `d` tags.** kind-30083 carries OC Stamp envelopes under the `oc-stamp:` `d`-tag prefix; co-claimed with OC Agent (delegations under `oc-agent-del:`). Don't overload `d`-tag namespaces within a kind.
 8. **Legibility over minimalism at the wallet boundary.** Hex > raw bytes for signed-message prompts.
 9. **Re-resolvable stake pointers.** Never trust the envelope's declared numbers — resolve the attestation.
 10. **Ship the API before the UI.** `stamp()` and `verify()` must work from a CLI before a web app ever renders.

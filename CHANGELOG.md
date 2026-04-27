@@ -5,6 +5,7 @@
 ### Spec
 
 - **`LIFECYCLE.md`** — normative companion document specifying what a publisher MAY do to a stamp after publication and what a verifier MUST do in response. Pins down the stamp-is-immutable-and-non-revocable position that `SPEC.md` §10 left informal. No protocol changes; clarification only. Reaffirms that conforming verifiers MUST ignore any `retract id:X` informal pattern, dashboard-local hide flags, and NIP-09 deletion-request events.
+- **`SPEC.md` §7, §15 + `WHY.md` H6 / design rule 7** — kind-30083 is now documented as **co-claimed** with OC Agent (delegation envelopes under the disjoint `d`-tag namespace `oc-agent-del:`). Verifiers MUST filter by `#d` prefix or by envelope `kind` when querying kind 30083. No on-the-wire change for OC Stamp; clarifies the family-level reality created by OC Agent v1 (2026-04).
 - No other protocol changes; v1.0.0 remains current. SPEC §3.1 and §4 already required the constraints the SDK now enforces at runtime.
 
 ### Reference SDK
