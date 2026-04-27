@@ -2,13 +2,14 @@
 
 ## [Unreleased] — 2026-04
 
+### Spec
+
+- **`LIFECYCLE.md`** — normative companion document specifying what a publisher MAY do to a stamp after publication and what a verifier MUST do in response. Pins down the stamp-is-immutable-and-non-revocable position that `SPEC.md` §10 left informal. No protocol changes; clarification only. Reaffirms that conforming verifiers MUST ignore any `retract id:X` informal pattern, dashboard-local hide flags, and NIP-09 deletion-request events.
+- No other protocol changes; v1.0.0 remains current. SPEC §3.1 and §4 already required the constraints the SDK now enforces at runtime.
+
 ### Reference SDK
 
 - `@orangecheck/stamp-core` **0.1.1** — non-breaking. Added `validateCanonicalInput(input)` that's called by `stamp()` before producing the canonical bytes, catching whitespace in addresses, non-hex content hashes, fractional lengths, and missing-Z signed_at values before they produce a signature nobody can verify. Added `hashContent(bytes)` helper. 60/60 tests green.
-
-### Spec
-
-- No protocol changes; v1.0.0 remains current. SPEC §3.1 and §4 already required the constraints the SDK now enforces at runtime.
 
 
 All notable changes to the OC Stamp protocol and reference SDK.

@@ -24,6 +24,7 @@ This repository is the **normative protocol specification**. No code lives here 
 | [`PROTOCOL.md`](./PROTOCOL.md) | Narrative walkthrough with flow diagrams (single stamp, batched aggregation, verification offline, commit signing). |
 | [`WHY.md`](./WHY.md) | Design rationale. Why provenance needs a Bitcoin primitive. Why C2PA, PGP, and OTS-alone don't fit. What we kept from each. |
 | [`SECURITY.md`](./SECURITY.md) | Threat model, trust assumptions, compliance requirements, report channel. |
+| [`LIFECYCLE.md`](./LIFECYCLE.md) | Normative lifecycle stance — replace / revoke / withdraw / expire / hide. Stamps are immutable and non-revocable by design. |
 | [`CHANGELOG.md`](./CHANGELOG.md) | Version history. |
 
 ## Reference implementation
