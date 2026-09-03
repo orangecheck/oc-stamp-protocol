@@ -254,7 +254,7 @@ Kind 30083 is **co-claimed** with [OC Agent](https://github.com/orangecheck/oc-a
 | OC Stamp | `oc-stamp:<id>` | `stamp` |
 | OC Agent (delegation) | `oc-agent-del:<id>` | `agent-delegation` |
 
-A verifier that only handles stamps MUST filter Nostr queries by `#d` (e.g., `["oc-stamp:"]` prefix match) or by the envelope's `kind` field after fetching. Querying kind 30083 alone will return both stamp and agent-delegation events. Other family kinds in this range: 30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote, 30084 = OC Stamp / OC Agent shared action transport, 30085 = OC Agent revocation.
+A verifier that only handles stamps MUST filter Nostr queries by `#d` (e.g., `["oc-stamp:"]` prefix match) or by the envelope's `kind` field after fetching. Querying kind 30083 alone will return both stamp and agent-delegation events. Other family kinds in this range: 30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote, 30084 = OC Agent action, 30085 = OC Agent revocation.
 
 ```
 event.kind       = 30083

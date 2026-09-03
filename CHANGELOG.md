@@ -2,6 +2,22 @@
 
 ## [Unreleased] — 2026-04
 
+### Errata — 2026-09-03
+
+- **`SPEC.md` §7** described 30084 as a "OC Stamp / OC Agent shared action
+  transport". It is not shared: 30084 is OC Agent's action kind alone
+  (`oc-agent-protocol` §4 L55 — "OC Stamp v1 publishes stamps on kind 30083,
+  not 30084"), and this spec's own normative text puts stamps on 30083 (§7
+  L248, L260, §15). Corrected. No on-the-wire change to what this spec
+  requires — the line was a stray cross-reference, not a rule.
+- That line is the likely origin of a real defect: the reference site
+  `oc-stamp-web` published every stamp on kind **30084** until 2026-09-03, so
+  a conformant verifier querying `kinds:[30083]` found none of them, and
+  `relay.ochk.io` (which allows only `oc-agent-act:` d-tags on 30084) rejected
+  them outright. Fixed in `oc-stamp-web`; stamps published before that date are
+  discoverable only under 30084, so a client wanting full history should read
+  both kinds and route on the `oc-stamp:` d-tag.
+
 ### Spec
 
 - **`LIFECYCLE.md`** — normative companion document specifying what a publisher MAY do to a stamp after publication and what a verifier MUST do in response. Pins down the stamp-is-immutable-and-non-revocable position that `SPEC.md` §10 left informal. No protocol changes; clarification only. Reaffirms that conforming verifiers MUST ignore any `retract id:X` informal pattern, dashboard-local hide flags, and NIP-09 deletion-request events.
