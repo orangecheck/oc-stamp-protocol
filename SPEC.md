@@ -259,15 +259,17 @@ A verifier that only handles stamps MUST filter Nostr queries by `#d` (e.g., `["
 ```
 event.kind       = 30083
 event.tags       = [
-  ["d",        "oc-stamp:" || id],
-  ["addr",     signer.address],
-  ["hash",     content.hash],
-  ["signed_at", signed_at]
+  ["d", "oc-stamp:" || id],
+  ["t", signer.address],
+  ["t", content.hash],
+  ["t", "oc-stamp"]
 ]
 event.content    = <canonical JSON of envelope>
 event.pubkey     = ephemeral_nostr_pubkey (any Nostr key)
 event.created_at = unix_seconds
 ```
+
+Discovery tags are `t` tags because relays index only single-letter tag names (NIP-01); a filter on a multi-letter tag returns nothing, and some relays (strfry) close the subscription outright. Publishers MAY add further tags. Tags are unsigned relay metadata: a verifier MUST NOT rely on them and reads the address and hash from the envelope in `content`.
 
 The Nostr event `pubkey` has no relationship to the Bitcoin identity — the authenticity of the stamp is proven by the BIP-322 signature inside the envelope, not by the Nostr author. A fresh ephemeral Nostr keypair SHOULD be derived per-publish:
 
@@ -281,18 +283,27 @@ Clients SHOULD publish to at least three relays from a diverse set. The referenc
 
 By content hash:
 ```
-REQ { "kinds": [30083], "#hash": ["sha256:<hex>"] }
+REQ { "kinds": [30083], "#t": ["sha256:<hex>"] }
 ```
 
 By signer address:
 ```
-REQ { "kinds": [30083], "#addr": ["bc1q…"] }
+REQ { "kinds": [30083], "#t": ["bc1q…"] }
+```
+
+All stamps:
+```
+REQ { "kinds": [30083], "#t": ["oc-stamp"] }
 ```
 
 By envelope id:
 ```
 REQ { "kinds": [30083], "#d": ["oc-stamp:<id>"] }
 ```
+
+A relay match only nominates candidates. A reader MUST check that the envelope's `content.hash` or `signer.address` is the one it asked for, and verify the envelope (§8), before using it.
+
+**Older events.** Earlier drafts of this section specified multi-letter `addr` and `hash` tags, which no relay indexes. The reference app has published `t` tags for the signer address and `oc-stamp` since its first release, but no content-hash tag before 2026-09-24, and it published on kind 30084 before 2026-09-03 (see CHANGELOG). A reader that needs those stamps by content hash queries by signer address or `#t: ["oc-stamp"]` on kinds 30083 and 30084, and matches `content.hash` after fetching.
 
 The d-tag is content-addressed (`oc-stamp:<id>` where `id` is a hash of the canonical message). Kind-30083 is *addressable*: relays replace prior events with the same `(pubkey, kind, d-tag)` tuple. For OC Stamp this is harmless: a "replacement" with the same d-tag must carry the same id, hence the same signed content, or fail verification. A republish with the **same** id and an **upgraded** OTS proof is the common case — see §6.2.
 

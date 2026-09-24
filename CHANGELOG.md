@@ -2,6 +2,17 @@
 
 ## [Unreleased] — 2026-04
 
+### Changed — 2026-09-24
+
+- **`SPEC.md` §7 discovery tags are single-letter `t` tags**: the signer
+  address, the content hash, and `oc-stamp`. The previous `addr`, `hash` and
+  `signed_at` tags were multi-letter, which relays do not index, so the §7.1
+  queries `#addr` and `#hash` could not return results on any conformant
+  relay. §7.1 now queries `#t`, requires readers to check the envelope
+  against what they asked for, and says how to find events published before
+  this change. Tags remain unsigned metadata; nothing about envelope
+  verification changes.
+
 ### Errata — 2026-09-24
 
 - **`SPEC.md` §6.2** told clients to POST `id` to `/timestamp/:hash`. The
