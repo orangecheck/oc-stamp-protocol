@@ -2,6 +2,19 @@
 
 ## [Unreleased] — 2026-04
 
+### Errata — 2026-09-24
+
+- **`SPEC.md` §6.2** told clients to POST `id` to `/timestamp/:hash`. The
+  OpenTimestamps calendar protocol serves upgrades with
+  `GET /timestamp/<hex(commitment)>`, where the commitment is the message at
+  the pending calendar attestation, and the answer is a timestamp rooted there
+  that the client merges into its proof. Corrected. `@orangecheck/stamp-ots`
+  0.2.0 implements the corrected procedure.
+- **`SPEC.md` §6.3 and §8 step 5** now state two checks that were implied but
+  not written: the proof must commit to `id`, and the block header at
+  `block_height` must hash to `block_hash`. The Merkle root is compared in
+  header byte order.
+
 ### Errata — 2026-09-03
 
 - **`SPEC.md` §7** described 30084 as a "OC Stamp / OC Agent shared action

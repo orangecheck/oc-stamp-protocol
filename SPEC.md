@@ -211,10 +211,10 @@ OTS calendars aggregate submissions and anchor the root to Bitcoin roughly once 
 
 Any client (the signer, a verifier, or an archival service) MAY fetch the upgrade:
 
-1. POST `id` to the calendar's `/timestamp/:hash` endpoint.
-2. Replace `ots.proof` with the upgraded bytes.
-3. Extract `block_height` and `block_hash` from the proof.
-4. Set `status = "confirmed"`, `upgraded_at = now`.
+1. Walk `ots.proof` from `id` to each pending calendar attestation. The message at that attestation is the **commitment** the calendar indexes; it is not `id`.
+2. GET `<calendar>/timestamp/<hex(commitment)>`. A 404 means the calendar has not anchored it yet. Clients SHOULD only contact calendars listed in `ots.calendars`.
+3. Merge the returned timestamp (rooted at the commitment) into the proof at that attestation, and replace `ots.proof` with the merged proof.
+4. When the merged proof reaches a Bitcoin attestation, set `block_height` from it and `block_hash` from the header at that height whose Merkle root equals the attested message; set `status = "confirmed"`, `upgraded_at = now`.
 
 The upgrade rewrites `ots` but does not change `id`, `sig`, or any other field. The signature domain does not include `ots`, so the upgrade is cryptographically independent of the BIP-322 commitment.
 
@@ -223,9 +223,9 @@ The upgrade rewrites `ots` but does not change `id`, `sig`, or any other field. 
 A verifier with `ots.status === "confirmed"`:
 
 1. Parses `ots.proof` per the OpenTimestamps format.
-2. Walks the Merkle path from `id` up to the declared Bitcoin Merkle root.
-3. Fetches (or is supplied) the Bitcoin block header at `block_height` and compares its Merkle root to the one derived from the proof.
-4. Accepts the anchor iff the header's Merkle root matches and the header chains to a full-node-verified chain (or a trusted SPV-style checkpoint).
+2. Walks the proof from `id` to a Bitcoin attestation at `block_height`. A detached `.ots` file whose file digest is not `id` is rejected.
+3. Fetches (or is supplied) the Bitcoin block header at `block_height`, checks that its double-SHA256 is `block_hash`, and compares its Merkle root (header bytes 36–68, header byte order) to the message at the attestation.
+4. Accepts the anchor iff both checks hold and the header chains to a full-node-verified chain (or a trusted SPV-style checkpoint).
 
 A verifier that has no access to Bitcoin block headers (fully offline) MAY present the envelope as "signed, claims anchor at block N" and defer the anchor check. An **offline verifier with a block headers bundle** can verify anchors fully without any network call.
 
@@ -318,7 +318,7 @@ Given an envelope `E` and optionally a block headers source:
 5. **Anchor verify.** If `E.ots` is present and `E.ots.status === "confirmed"`:
    a. Parse `E.ots.proof`.
    b. Walk the Merkle path from `id` to the declared block's Merkle root.
-   c. Fetch the block header at `E.ots.block_height` (or use the provided headers bundle). Compare Merkle roots. If mismatch → `E_BAD_ANCHOR`.
+   c. Fetch the block header at `E.ots.block_height` (or use the provided headers bundle). If it does not hash to `E.ots.block_hash`, or its Merkle root differs from the walked root → `E_BAD_ANCHOR`.
 6. **Content check.** If the caller has the content bytes, compute `H(bytes)` and compare to `E.content.hash`. If mismatch → `E_BAD_CONTENT`.
 7. **Stake check (optional).** If the caller cares about `E.stake.attestation_id`, resolve the attestation via `@orangecheck/sdk#verify` and confirm the declared `sats_bonded` / `days_unspent` are still true (or still exceed the caller's threshold). If not → `E_STAKE_UNMET`.
 
