@@ -2,6 +2,10 @@
 
 ## [Unreleased] — 2026-04
 
+### Fixed — 2026-10-08
+
+- **Reference relay set** (§7): names the five relays the reference app actually uses. It listed `relay.damus.io`, which the shared default set has never included. Non-normative; nothing a client MUST do changes.
+
 ### Changed — 2026-09-24
 
 - **`SPEC.md` §7 discovery tags are single-letter `t` tags**: the signer
