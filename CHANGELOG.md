@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.2] — 2026-10-20 — errata: what the wallet signs
+
+**Errata release. No envelope, canonical-message or signature change.** §4.5
+was always the rule: the wallet signs `hex(id)`. Three passages said otherwise.
+
+- **`SPEC.md` §3** called the canonical message "the exact byte sequence the
+  signer's Bitcoin wallet signs". It is the sequence hashed into the id.
+- **`SPEC.md` §3.3** said a signer sees the six lines in the wallet's prompt.
+  The prompt shows the hex id; the client has to show the message, and anyone
+  can recompute the id from it.
+- **`PROTOCOL.md`** had Alice's wallet sign the message, then compute the id.
+  The id comes first, and the wallet signs it.
+- **`README.md`** said the message is signed and its result timestamped. The id
+  is signed, and the id is what goes to the calendar.
+
 ## [1.0.1] — 2026-10-20 — errata: a discovery filter that matched nothing
 
 **Errata release. No envelope, canonical-message or signature change. Verdicts

@@ -34,7 +34,7 @@ A stamp MAY include an optional **OrangeCheck attestation reference** (`stake.at
 
 ## 3. Canonical message
 
-The **canonical message** is the exact byte sequence the signer's Bitcoin wallet signs via BIP-322. It is designed to be human-legible in any wallet's "Sign Message" UI. The same bytes are hashed to produce the envelope id.
+The **canonical message** is the exact byte sequence hashed to produce the envelope id (§3.2). The wallet signs the hex form of that id, not these bytes (§4.5), and the id commits to every byte here, so the signature covers every field. The message is human-legible so a client can show the signer what the id stands for.
 
 ### 3.1 Format
 
@@ -65,7 +65,7 @@ Any change to the canonical message — including whitespace, capitalization, or
 
 ### 3.3 Why this shape
 
-The canonical message is short, structured, and legible. A user signing through UniSat, Xverse, Leather, Sparrow, or Electrum sees exactly this text in the signing prompt. The lines are domain-separated by `oc-stamp:v1`, so the signature cannot be replayed against another OrangeCheck protocol's canonical message (e.g., OC Lock's `oc-lock:device-bind:v2`).
+The canonical message is short, structured, and legible. The wallet's signing prompt shows the 64-character hex id, not this text, so a signer relies on the client to show the message the id was computed from; anyone can recompute the id from it and check. The lines are domain-separated by `oc-stamp:v1`, so an id cannot collide with one computed from another OrangeCheck protocol's canonical message (e.g., OC Lock's `oc-lock:device-bind:v2`).
 
 ## 4. Envelope format
 

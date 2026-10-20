@@ -65,8 +65,8 @@ Every stamp is **one signing ceremony, one calendar submission, one later upgrad
    content_mime: text/markdown
    signed_at: 2026-04-24T18:30:00Z
    ```
-4. Alice's wallet signs it with BIP-322. One signature prompt. One click.
-5. The client computes `id = H(canonical_message)`.
+4. The client computes `id = H(canonical_message)` and shows Alice the message beside it.
+5. Alice's wallet signs the hex `id` with BIP-322. One signature prompt. One click.
 6. The client submits `id` to two OTS calendars and receives **pending proofs**.
 7. The client assembles the envelope:
    ```json
