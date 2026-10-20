@@ -74,7 +74,7 @@ Each hypothesis is a claim the design relies on. We state it, we try to break it
 
 **Verdict. KEPT.** Kind 30083, with the `oc-stamp:` `d`-tag namespace.
 
-> **Note (post-v1).** OC Agent v1 (2026-04) subsequently claimed kind 30083 for delegation envelopes under the disjoint `d`-tag namespace `oc-agent-del:`. The two sub-protocols share the kind without collision because (a) `d`-tag prefixes are disjoint, and (b) each envelope carries an internal `kind` field (`stamp` vs `agent-delegation`) that any verifier reads after fetching. Verifiers MUST filter by `#d` prefix or by envelope `kind` — querying kind 30083 alone returns both event types. See SPEC §7.
+> **Note (post-v1).** OC Agent v1 (2026-04) subsequently claimed kind 30083 for delegation envelopes under the disjoint `d`-tag namespace `oc-agent-del:`. The two sub-protocols share the kind without collision because (a) `d`-tag prefixes are disjoint, and (b) each envelope carries an internal `kind` field (`stamp` vs `agent-delegation`) that any verifier reads after fetching. A query on kind 30083 returns both event types, and relays cannot filter by `d` prefix, so verifiers check the envelope `kind` after fetching. See SPEC §7.
 
 ### H7. Signing the hex form of `id` beats signing raw bytes
 

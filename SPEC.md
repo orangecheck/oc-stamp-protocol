@@ -254,7 +254,11 @@ Kind 30083 is **co-claimed** with [OC Agent](https://github.com/orangecheck/oc-a
 | OC Stamp | `oc-stamp:<id>` | `stamp` |
 | OC Agent (delegation) | `oc-agent-del:<id>` | `agent-delegation` |
 
-A verifier that only handles stamps MUST filter Nostr queries by `#d` (e.g., `["oc-stamp:"]` prefix match) or by the envelope's `kind` field after fetching. Querying kind 30083 alone will return both stamp and agent-delegation events. Other family kinds in this range: 30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote, 30084 = OC Agent action, 30085 = OC Agent revocation.
+Tag filters match whole values. NIP-01 has no prefix match, so `"#d": ["oc-stamp:"]` matches no event at all, and a relay answers it with no events. A verifier that handles only stamps queries with a §7.1 filter (`#t`, or `#d` with a full `oc-stamp:<id>`) and discards any event whose envelope `kind` is not `stamp`. `#t: ["oc-stamp"]` returns stamps from conforming publishers, but anyone can set any tag, so the `kind` check still applies.
+
+> **Errata (2026-10-20).** This paragraph said a verifier "MUST filter Nostr queries by `#d` (e.g., `["oc-stamp:"]` prefix match)". Relays match tag values exactly, so that filter returned nothing on every relay, and a client reading the empty answer as "no stamps" was wrong without any error to show it.
+
+Other family kinds in this range: 30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote, 30084 = OC Agent action, 30085 = OC Agent revocation.
 
 ```
 event.kind       = 30083
@@ -310,6 +314,21 @@ The d-tag is content-addressed (`oc-stamp:<id>` where `id` is a hash of the cano
 ### 7.2 Republishing after upgrade
 
 When an OTS proof is upgraded from pending to confirmed, any party (signer, aggregator, archival crawler) MAY republish the envelope with the updated `ots` field. Verifiers MUST accept the event with the latest `upgraded_at` and `status === "confirmed"` when multiple conflict.
+
+### 7.3 Reading relay replies
+
+The §7.1 filters use only `#d` and `#t`, the tag names relays index. A client MUST NOT filter on a multi-letter tag name, and MUST NOT pass a prefix as a tag value.
+
+A relay has **answered** a query only when it sent `EOSE` for that subscription and every event it returned satisfies the filter as sent. Any other outcome means the client has **not heard back** from that relay:
+
+- a `CLOSED` for the subscription, or a `NOTICE` reporting an error;
+- the connection failing or closing before `EOSE`;
+- no `EOSE` before the client's deadline;
+- an event that does not satisfy the filter, which shows the relay did not apply it.
+
+Not hearing back MUST NOT be treated as evidence that no stamp exists. A reader MAY report that no stamp matches only from relays that answered, and only for stamps carrying the tag it asked for (see "Older events", §7.1). If no relay answered, the reader has not looked, and MUST NOT report that the content is unstamped. An event a relay returns is a candidate, never a verdict: check it against what you asked for and verify it (§8) before using it.
+
+> **Errata (2026-10-20).** This section is new. The rule matches OC Agent `SPEC.md` §10.4.
 
 ## 8. Verification algorithm
 
@@ -420,6 +439,7 @@ A client is OC Stamp v1 compliant if and only if:
 - [ ] Parses and upgrades OTS proofs per §6.2
 - [ ] Verifies OTS anchor against Bitcoin block headers per §6.3 when `status === "confirmed"`
 - [ ] Verifies sender BIP-322 signatures before trusting envelope contents
+- [ ] Queries relays with the §7.1 filters only, whole values in `#d` and `#t`, and treats a relay that did not answer as not heard back, per §7.3
 - [ ] Produces error codes per §10
 - [ ] Rejects unknown `v` values; preserves unknown fields on relay
 - [ ] Passes every committed test vector in [`test-vectors/`](./test-vectors/)

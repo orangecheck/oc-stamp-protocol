@@ -1,6 +1,52 @@
 # Changelog
 
-## [Unreleased] — 2026-04
+## [1.0.1] — 2026-10-20 — errata: a discovery filter that matched nothing
+
+**Errata release. No envelope, canonical-message or signature change. Verdicts
+on every existing test vector are unchanged.** It also releases the
+corrections listed below it, made between 1.0.0 and this date.
+
+### Fixes
+
+- **`SPEC.md` §7 co-claim paragraph.** A verifier was told it "MUST filter
+  Nostr queries by `#d` (e.g., `["oc-stamp:"]` prefix match)". NIP-01 tag
+  filters match whole values, so that filter matched no event on any relay.
+  The relay still answers it, with no events, so a client reading that answer
+  as "no stamps" got no error to show the mistake. A stamps-only verifier now
+  queries with a §7.1 filter and checks the envelope `kind`.
+- **`SPEC.md` §7.3 (new) reading relay replies.** Filters use only `#d` and
+  `#t`, with whole values. A relay has answered only when it sent `EOSE` and
+  every event it returned matches the filter. A `CLOSED`, an error `NOTICE`, a
+  dropped connection, a timeout or an off-filter event means "not heard back",
+  never "absent". A reader reports that content is unstamped only from relays
+  that answered. The rule matches OC Agent `SPEC.md` §10.4.
+- **`SPEC.md` §12.** The compliance checklist names the §7.3 rule.
+- **`WHY.md` H6 note.** Repeated the prefix rule. Now says verifiers check the
+  envelope `kind` after fetching.
+
+What publishers set is unchanged: `d` = `oc-stamp:<id>`, and `t` tags for the
+signer address, the content hash (`sha256:<hex>`) and `oc-stamp`. The
+reference app at stamp.ochk.io sets those four, plus a multi-letter
+`oc-stamp-id` tag no reader relies on.
+
+### Evidence
+
+Measured 2026-10-20, REQ only, on `relay.ochk.io`, `nos.lol` and
+`relay.primal.net`. `#d: ["oc-stamp:"]` got `EOSE` and no events from all
+three. Tag filters matched whole values only: on each relay, `#d` with a full
+value returned the event it names, and `#d` with that value's prefix returned
+nothing. Every §7.1 filter got `EOSE` from all three. `nos.lol` dropped some
+connections when sent fourteen at once and answered the same filters when
+sent one at a time, which is the "not heard back" case §7.3 describes.
+
+### Migration
+
+**None required.** `#t: ["oc-stamp"]` on kinds 30083 and 30084 returned no
+events from `relay.ochk.io`, `nos.lol`, `relay.primal.net`, `offchain.pub` or
+`relay.snort.social`, and a read of kinds 30083–30086 from those five found no
+`oc-stamp:` `d`-tag. No stamp on those relays was hidden by the old filter.
+
+## Corrections between 1.0.0 and 1.0.1 (2026-04 – 2026-10-08)
 
 ### Fixed — 2026-10-08
 
