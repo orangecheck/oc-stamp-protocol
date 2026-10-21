@@ -4,7 +4,7 @@ This is a narrative companion to [SPEC.md](./SPEC.md). If you want the normative
 
 ## The problem
 
-> "I signed this. I signed it at this moment. I had this much stake when I signed it. Anyone, anywhere, anytime can verify all three without asking a vendor anything."
+> "I signed this. I signed it at this moment. Here is the stake behind my address. Anyone, anywhere, anytime can verify all three without asking a vendor anything."
 
 That is the user story OC Stamp serves. It sounds simple. Every adjacent project has failed at one or more of those three legs:
 
@@ -150,31 +150,31 @@ No GPG. No keyserver. One `BIP-322 signMessage` that every major wallet has supp
 
 ## Flow 3 — Sybil-gated content feed
 
-A publishing platform — Nostr client, DAO forum, long-form blog aggregator — wants to accept content from anyone but require a stake signal to discourage spam and AI-farmed drivel. `@orangecheck/gate` already solves the "does this user have stake" question for live interactions. Stamps extend that to **durable content provenance**: *when this was written, was the signer meeting our threshold?*
+A publishing platform — Nostr client, DAO forum, long-form blog aggregator — wants to accept content from anyone but require a stake signal to discourage spam and AI-farmed drivel. `@orangecheck/gate` already solves the "does this user have stake" question for live interactions. Stamps extend that to **durable content provenance**: the content's author, re-checked against the chain whenever the platform looks.
 
 ```ts
-import { ocGate } from '@orangecheck/gate';
-import { verifyStamp } from '@orangecheck/stamp-core';
+import { verifySignature } from '@orangecheck/bip322';
+import { checkStake, verify, type StampEnvelope } from '@orangecheck/stamp-core';
 
-app.post('/submit', async (req, res) => {
-  const { stamp, contentBytes } = req.body;
-  const result = await verifyStamp({
-    envelope: stamp,
-    content: contentBytes,
-    requireAnchor: true,
+async function acceptSubmission(envelope: StampEnvelope, bytes: Uint8Array) {
+  const r = await verify({
+    envelope,
+    content: bytes,
+    verifyBip322: async (msg, sig, addr) => verifySignature(addr, msg, sig),
   });
-  if (result.code) return res.status(400).json({ error: result.code });
+  if (!r.ok) return { accepted: false, error: r.code };
+  if (!r.envelope.stake) return { accepted: false, error: 'no_stake' };
 
-  // Use the declared stake if present, or re-resolve live.
-  const attestation = await ocGate.resolve(result.envelope.stake?.attestation_id);
-  if (attestation.sats_bonded < 100_000 || attestation.days_unspent < 30) {
-    return res.status(403).json({ error: 'stake_below_threshold' });
-  }
-  // accept
-});
+  // `stake` is unsigned: re-resolve it, and accept only the signer's own attestation.
+  const id = r.envelope.stake.attestation_id;
+  const att = await fetch(`https://attest.ochk.io/api/check?id=${id}`).then((res) => res.json());
+  const stake = checkStake(r.envelope, att.ok ? att : null, { minSats: 100_000, minDays: 30 });
+  if (!stake.ok) return { accepted: false, error: stake.message };
+  return { accepted: true };
+}
 ```
 
-The time-pinned stake is better than a bare live attestation: you can require "the signer had stake at the moment they wrote this," which defeats farmed-stake-in-the-last-week gaming.
+The check runs against the chain as it is when the platform verifies. Requiring 30 days unspent means the coins sat for a month, which defeats stake farmed in the last week.
 
 ## Flow 4 — Legal self-notarization
 
@@ -190,7 +190,7 @@ In jurisdictions that recognize digital signatures (Federal Rules of Evidence 90
 
 A DAO proposes a treasury change. The proposal is a Markdown document. Today, it lives in a forum thread — authorship is whoever clicked "post" on Discourse, which is whichever wallet signed into SSO. Ephemeral, forum-scoped, not cryptographically durable.
 
-With OC Stamp, the proposal author stamps the document and includes the `.stamp` envelope in the proposal body. The stamp carries: *who proposed, when, at what stake.* If the DAO later votes on the proposal via `@orangecheck/vote`, the ballot can reference the stamp id; the tally function has access to durable authorship and time-pinned stake without asking any server.
+With OC Stamp, the proposal author stamps the document and includes the `.stamp` envelope in the proposal body. The stamp carries: *who proposed and when*, plus an optional stake reference that anyone can re-check. If the DAO later votes on the proposal via `@orangecheck/vote`, the ballot can reference the stamp id; the tally function has access to durable authorship and priority without asking any server.
 
 ## What makes this Bitcoin-load-bearing
 

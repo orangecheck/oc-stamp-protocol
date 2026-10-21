@@ -58,11 +58,11 @@ Each hypothesis is a claim the design relies on. We state it, we try to break it
 
 **Verdict. KEPT.** Offline-verifiability is non-negotiable.
 
-### H5. Stake must be declared in the signed canonical message *by reference*, not by value
+### H5. Stake must be declared *by reference*, not by value
 
-**Claim.** If the envelope declared `sats_bonded: 500000` in the canonical message and the attestation later became stale, the envelope would be a liar. Instead, the canonical message binds identity-at-signing-time via `signed_at`; `stake.attestation_id` inside the envelope points to an OrangeCheck attestation that the verifier can re-resolve. The declared numeric values are informational.
+**Claim.** If the envelope declared `sats_bonded: 500000` as a fact and the attestation later became stale, the envelope would be a liar. Instead, `stake.attestation_id` inside the envelope points to an OrangeCheck attestation that the verifier can re-resolve. The declared numeric values are informational. The reference is outside the canonical message, so it is not signed.
 
-**Adversarial test.** Can a signer attach the wrong attestation_id? Yes — but the verifier re-resolves and the mismatch is visible (different address, different sats, different age). Trust the chain, not the envelope's boasts.
+**Adversarial test.** Can someone attach the wrong attestation_id? Yes — the signer, or anyone who relays the envelope, since `stake` is unsigned. The verifier re-resolves it and checks that the attestation's address is `signer.address` (SPEC §8.1 step 7); another address's attestation fails, and a stripped one means no stake. Trust the chain, not the envelope's boasts.
 
 **Verdict. KEPT.** Stake is a re-resolvable pointer, not an embedded fact.
 
@@ -94,7 +94,7 @@ Each hypothesis is a claim the design relies on. We state it, we try to break it
 
 ### H9. Aggregators are liveness-scoped, not authenticity-scoped
 
-**Claim.** An aggregator at stamp.ochk.io batches OTS submissions. Worst case: it refuses service or drops ids before submission. It cannot forge envelopes (no keys), cannot backdate (OTS won't let it), cannot strip stake context (baked into `id` via canonical message).
+**Claim.** An aggregator at stamp.ochk.io batches OTS submissions. Worst case: it refuses service or drops ids before submission. It cannot forge envelopes (no keys), cannot backdate (OTS won't let it), and cannot make another address's stake count for the signer: it can strip or swap the unsigned `stake` reference, and the verifier's address check catches a swap.
 
 **Adversarial test.** Could an aggregator correlate submissions to deanonymize users? Yes — submission time and IP are visible to the aggregator. Signers wanting anonymity should submit to calendars directly. This is a privacy-vs-convenience trade-off and we name it.
 

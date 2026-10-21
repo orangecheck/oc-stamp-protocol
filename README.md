@@ -8,7 +8,7 @@ A stamp proves three things at once:
 
 1. **Authorship** — a specific Bitcoin address signed this exact byte sequence (BIP-322).
 2. **Priority** — the hash of that byte sequence existed before Bitcoin block N (OpenTimestamps).
-3. **Stake at signing** *(optional)* — the signing address carried a specific OrangeCheck attestation (sats bonded × days unspent) at the moment the stamp was created.
+3. **Stake** *(optional)* — a reference to an OrangeCheck attestation (sats bonded × days unspent) of the signing address. It is not signed: a verifier re-resolves it against current chain state and checks that the attestation belongs to the signer.
 
 Strip any one of those three and you degrade to a known commoditized primitive — PGP, OpenTimestamps alone, or a bare Bitcoin-address signature. The combination is what makes OC Stamp Bitcoin-load-bearing and not substitutable on Ed25519.
 

@@ -71,3 +71,15 @@ New implementations should add a similar test.
 | `v03-with-ref.json` | Includes `content.ref` pointer (IPFS) |
 | `v04-ots-pending.json` | OTS proof in pending state (not yet anchored) |
 | `v05-ots-confirmed.json` | OTS proof upgraded to confirmed with block_height + block_hash |
+| `v06-stake-stripped.json` | v02 with `stake` removed: same canonical message, id and signature; a stake policy sees no stake (`E_STAKE_UNMET`) |
+| `v07-stake-swapped.json` | v02 with another address's attestation swapped in: same id; the stake check MUST reject it (`E_STAKE_UNMET`) |
+| `v08-stake-own.json` | v02's own attestation, resolved now with values below the declared ones: the stake check accepts on the resolved values |
+
+### Stake-check vectors (v06–v08)
+
+These carry a `stake_check` block: the attestation as resolved at verification
+time (`attestation_id`, the `address` that signed it, current `sats` and `days`),
+a policy, and the expected outcome of SPEC §8.1 step 7. Resolution needs the
+chain, so the vector supplies its result. A conformant stake check accepts only
+an attestation whose id is `stake.attestation_id` and whose address is
+`signer.address`, and judges the resolved values, never the declared ones.

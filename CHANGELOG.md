@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.0.3] — 2026-10-21 — errata: the stake is not signed
+
+**Errata release. No envelope, canonical-message or signature change, and no
+id changes.** `stake` has never been in the canonical message (§3.1), so it is
+outside the id and the signature. Several passages said it was signed into the
+id, or that it proved the stake at the moment of signing. Anyone who relays an
+envelope can strip `stake`, add one, or swap in another address's attestation,
+and the signature still verifies.
+
+- **§2, §4.4.** `stake` is self-declared, re-verifiable and not signed. A
+  verifier that cares MUST re-resolve it and MUST check that the attestation was
+  signed by `signer.address`.
+- **§8.1 step 7.** The stake check now requires, against the attestation as
+  resolved now: its id is `stake.attestation_id`, its address is
+  `signer.address`, and its current bond meets the policy. The declared values
+  are ignored. A missing stake fails the check with `E_STAKE_UNMET`.
+- **§8.2, §11.1.** A passing stake check says the signer's own attestation
+  meets the policy at verification time. It says nothing about the stake when
+  the stamp was signed.
+- **§11.4.** Removed "the aggregator cannot strip stake context". It can strip,
+  add or swap it; step 7 catches a swap.
+- **§12.** New checklist item for the step 7 address check.
+- **`SECURITY.md`, `WHY.md` H5 and H9, `PROTOCOL.md` Flow 3 and Flow 5,
+  `README.md`.** The same correction. Flow 3's sample called `verifyStamp` and
+  `ocGate.resolve`, which do not exist; it now uses `verify` and `checkStake`
+  from `@orangecheck/stamp-core`.
+- **New vectors.** v06 (stake stripped), v07 (another address's attestation)
+  and v08 (the signer's own, resolved below its declared values), each with a
+  `stake_check` block.
+
+Reference implementation: `@orangecheck/stamp-core` 1.2.0 adds `checkStake`.
+
 ## [1.0.2] — 2026-10-20 — errata: what the wallet signs
 
 **Errata release. No envelope, canonical-message or signature change.** §4.5

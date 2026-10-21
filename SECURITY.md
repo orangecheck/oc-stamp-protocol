@@ -22,8 +22,8 @@ This document covers the **OC Stamp v1 protocol specification** in this reposito
 - **Authenticity of the signer** against forgery. The BIP-322 signature in `sig.value` binds the envelope id to the signer's Bitcoin address. A forged envelope would require the signer's private key.
 - **Integrity of the canonical message.** The envelope `id` is a cryptographic commitment to the canonical bytes; any modification to `content.hash`, `content.length`, `content.mime`, `signer.address`, or `signed_at` invalidates the id and the signature.
 - **Block-anchored priority.** A confirmed OTS proof proves the envelope id existed on or before the block at `ots.block_height`, under the assumption that Bitcoin consensus is not violated.
-- **Stake context (when declared and re-verified).** The declared `stake.attestation_id` is a pointer to an OrangeCheck attestation; verifiers MUST re-resolve it to confirm the stake is current. The declared `sats_bonded` / `days_unspent` values are informational.
-- **Tamper-evidence across mirrors.** Any modification of the envelope in transit produces a different id, which fails BIP-322 verification.
+- **Stake context (when declared and re-verified).** The declared `stake.attestation_id` is a pointer to an OrangeCheck attestation; verifiers MUST re-resolve it to confirm the stake is current, and MUST check that the attestation was signed by `signer.address`. The declared `sats_bonded` / `days_unspent` values are informational. `stake` is not signed: it can be stripped, added or swapped in transit without breaking the signature.
+- **Tamper-evidence across mirrors.** Any modification of a canonical-message field in transit produces a different id, which fails BIP-322 verification. `stake`, `ots` and `content.ref` are outside the canonical message; `ots` is checked against Bitcoin, `stake` against OrangeCheck and `signer.address`, and `content.ref` is only a pointer.
 
 ### What OC Stamp does not protect
 
@@ -48,7 +48,7 @@ These are cryptographic correctness conditions that conforming implementations M
 1. **Reconstruct the canonical message before trusting the declared `id`.** Implementations MUST compute `H(canonical_message)` from `(signer.address, content.hash, content.length, content.mime, signed_at)` and compare to `envelope.id`. Accepting the declared `id` without reconstruction allows an attacker to swap signed content.
 2. **Verify `sig.value` before trusting envelope contents.** No exceptions in v1.
 3. **Verify the OTS anchor against a real Bitcoin block header** when `ots.status === "confirmed"`. Parsing the proof without verifying the header's Merkle root is a valid performance choice for a preview UI, but a verifier that accepts the stamp MUST do the full check before attaching legal / economic weight to the anchor.
-4. **Re-resolve any stake claim.** Implementations that care about stake thresholds MUST NOT trust the declared `sats_bonded` / `days_unspent`; they MUST fetch the attestation via OrangeCheck and confirm the values against current chain state.
+4. **Re-resolve any stake claim.** Implementations that care about stake thresholds MUST NOT trust the declared `sats_bonded` / `days_unspent`; they MUST fetch the attestation via OrangeCheck, confirm the values against current chain state, and confirm that the attestation's address is `signer.address` (SPEC §8.1 step 7).
 5. **Reject unknown `envelope.v`** values. Preserve unknown optional fields when relaying; ignore them when verifying.
 6. **Produce byte-identical canonical messages** for identical inputs across implementations. Test-vector conformance (§12 of SPEC) is not optional.
 7. **Sign the hex form of `id`** (64 ASCII bytes) with BIP-322, not the raw 32 bytes. This is for wallet legibility and spec-level determinism (§4.5 of SPEC).

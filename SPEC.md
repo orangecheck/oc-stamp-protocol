@@ -30,7 +30,7 @@ A signer MAY verify their own stamps; a verifier MAY be the signer.
 
 A signer is identified by a **mainnet Bitcoin address** (P2WPKH, P2TR, or P2PKH). The address is the full identity: there are no usernames, keyservers, or accounts in the protocol.
 
-A stamp MAY include an optional **OrangeCheck attestation reference** (`stake.attestation_id`) binding the stamp to a declared sats-bonded × days-unspent signal at the moment of signing. The reference is **self-declared** and **re-verifiable**: a verifier that cares about stake MUST re-resolve the attestation against current chain state rather than trusting the declared values.
+A stamp MAY include an optional **OrangeCheck attestation reference** (`stake.attestation_id`) pointing at a declared sats-bonded × days-unspent signal. The reference is **self-declared** and **re-verifiable**, and it is **not signed**: `stake` is outside the canonical message (§3.1), so it is outside the id and the signature, and anyone who handles the envelope can add, remove or change it without breaking verification. A verifier that cares about stake MUST re-resolve the attestation against current chain state rather than trusting the declared values, and MUST check that the attestation was signed by `signer.address` (§8.1 step 7).
 
 ## 3. Canonical message
 
@@ -130,7 +130,7 @@ A stamp is a single canonical JSON object called the **envelope**. It is referre
 | `signer.address` | MUST match `address` in the canonical message. |
 | `signer.alg` | MUST equal `"bip322"` in v1. |
 | `signed_at` | MUST match `signed_at` in the canonical message. |
-| `stake` | Optional. If present, `sats_bonded` MUST be a non-negative integer; `days_unspent` MUST be a non-negative integer. `attestation_id` SHOULD be the sha256 of an OrangeCheck canonical message signed by `signer.address`. |
+| `stake` | Optional. If present, `sats_bonded` MUST be a non-negative integer; `days_unspent` MUST be a non-negative integer. `attestation_id` SHOULD be the sha256 of an OrangeCheck canonical message signed by `signer.address`. Not in the canonical message, so not covered by `id` or `sig.value` (§2). |
 | `ots` | See §6. `null` is permitted for "signed but not yet anchored" envelopes; verifiers MAY reject envelopes without `ots` depending on policy. |
 | `sig.alg` | MUST equal `"bip322"` in v1. |
 | `sig.pubkey` | MUST equal `signer.address`. |
@@ -350,7 +350,11 @@ Given an envelope `E` and optionally a block headers source:
    b. Walk the Merkle path from `id` to the declared block's Merkle root.
    c. Fetch the block header at `E.ots.block_height` (or use the provided headers bundle). If it does not hash to `E.ots.block_hash`, or its Merkle root differs from the walked root → `E_BAD_ANCHOR`.
 6. **Content check.** If the caller has the content bytes, compute `H(bytes)` and compare to `E.content.hash`. If mismatch → `E_BAD_CONTENT`.
-7. **Stake check (optional).** If the caller cares about `E.stake.attestation_id`, resolve the attestation via `@orangecheck/sdk#verify` and confirm the declared `sats_bonded` / `days_unspent` are still true (or still exceed the caller's threshold). If not → `E_STAKE_UNMET`.
+7. **Stake check (optional).** If the caller has a stake policy: if `E.stake` is absent → `E_STAKE_UNMET`. Otherwise resolve `E.stake.attestation_id` against current chain state (for example `@orangecheck/sdk#verify`) and require all of:
+   a. the attestation resolves, and its id is `E.stake.attestation_id`;
+   b. the attestation's address equals `E.signer.address`;
+   c. its resolved sats bonded and days unspent meet the caller's threshold.
+   The declared `sats_bonded` / `days_unspent` are ignored. If any check fails → `E_STAKE_UNMET`. `stake` is unsigned (§2), so (b) is what stops another address's attestation from being attached to a stamp.
 
 A **minimal verification** skips steps 5 (anchor), 6 (content bytes), and 7 (stake) and reports the envelope as "authentic but not anchored / content not checked." This is the right mode for offline readers that only care about authorship.
 
@@ -364,7 +368,7 @@ A stamp that passes full verification proves:
 | `E_BAD_SIG` clean | The holder of `E.signer.address` at signing time authorized the canonical message. |
 | `E_BAD_ANCHOR` clean | The envelope id existed before the block at `E.ots.block_height`. |
 | `E_BAD_CONTENT` clean | The bytes the caller examined are the bytes the signer attested to. |
-| `E_STAKE_UNMET` clean | The signer's attestation meets the caller's stake policy. |
+| `E_STAKE_UNMET` clean | An attestation signed by the signer's address meets the caller's stake policy at verification time. It says nothing about the stake when the stamp was signed. |
 
 Anyone, anywhere, anytime can run this algorithm offline given the envelope and a block headers snapshot. **No ochk.io endpoint is required or consulted at verify time.**
 
@@ -395,7 +399,7 @@ Client errors MUST use these codes. Users see short human-readable messages; log
 - **Authorship.** Under the BIP-322 assumption, only the holder of `signer.address`'s private key could have produced `sig.value`.
 - **Priority.** Under the Bitcoin consensus assumption, the envelope id existed on or before the block at `ots.block_height` (confirmed anchors only).
 - **Integrity.** Any tampering with `content.hash`, `content.length`, `content.mime`, `signed_at`, or `signer.address` invalidates `id` and therefore `sig.value`.
-- **Stake (when declared and re-verified).** At the moment a verifier resolves `stake.attestation_id`, the holder of `signer.address` also controls / controlled UTXOs matching the declared bond.
+- **Stake (when declared and re-verified per §8.1 step 7).** At the moment a verifier resolves `stake.attestation_id`, the attestation was signed by `signer.address` and its bond holds against current chain state.
 
 ### 11.2 What OC Stamp does NOT prove
 
@@ -424,7 +428,8 @@ The aggregator cannot:
 
 - Forge envelopes (it would need the signer's Bitcoin key).
 - Backdate envelopes (it would need to break OTS or Bitcoin).
-- Strip stake context (the stake is signed into the canonical message via `id`).
+
+The aggregator, like anyone who relays an envelope, can strip, add or swap the `stake` reference, which is outside the `id` (§2). A verifier that follows §8.1 step 7 rejects another address's attestation and treats a stripped one as no stake.
 
 ## 12. Compliance checklist
 
@@ -440,6 +445,7 @@ A client is OC Stamp v1 compliant if and only if:
 - [ ] Verifies OTS anchor against Bitcoin block headers per §6.3 when `status === "confirmed"`
 - [ ] Verifies sender BIP-322 signatures before trusting envelope contents
 - [ ] Queries relays with the §7.1 filters only, whole values in `#d` and `#t`, and treats a relay that did not answer as not heard back, per §7.3
+- [ ] When it enforces a stake policy, re-resolves `stake` and requires the attestation's address to equal `signer.address`, per §8.1 step 7
 - [ ] Produces error codes per §10
 - [ ] Rejects unknown `v` values; preserves unknown fields on relay
 - [ ] Passes every committed test vector in [`test-vectors/`](./test-vectors/)
