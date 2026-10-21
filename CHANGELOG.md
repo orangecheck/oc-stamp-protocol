@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed — 2026-10-21
+
+- **Reference relay set** (§7): names the relays the reference app now uses. `relay.snort.social` and `offchain.pub` left it on 2026-10-21: snort kept none of the family events it accepted, and offchain refused events signed by fresh keys. `relay.damus.io` and `nostr.oxtr.dev` joined. Non-normative; nothing a client MUST do changes.
+
 ## [1.0.3] — 2026-10-21 — errata: the stake is not signed
 
 **Errata release. No envelope, canonical-message or signature change, and no

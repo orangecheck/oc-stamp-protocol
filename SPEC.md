@@ -281,7 +281,7 @@ The Nostr event `pubkey` has no relationship to the Bitcoin identity — the aut
 nostr_sk := HKDF(ikm=random(32), salt="oc-stamp/v1/nostr-key", info=id, L=32)
 ```
 
-Clients SHOULD publish to at least three relays from a diverse set. The reference app uses `relay.ochk.io`, `nos.lol`, `relay.primal.net`, `offchain.pub` and `relay.snort.social`, the default set in `@orangecheck/nostr-core`.
+Clients SHOULD publish to at least three relays from a diverse set. The reference app uses `relay.ochk.io`, `nos.lol`, `relay.primal.net`, `relay.damus.io` and `nostr.oxtr.dev`, the default set in `@orangecheck/nostr-core`.
 
 ### 7.1 Discovery queries
 
