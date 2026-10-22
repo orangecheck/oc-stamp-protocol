@@ -317,7 +317,18 @@ The d-tag is content-addressed (`oc-stamp:<id>` where `id` is a hash of the cano
 
 ### 7.2 Republishing after upgrade
 
-When an OTS proof is upgraded from pending to confirmed, any party (signer, aggregator, archival crawler) MAY republish the envelope with the updated `ots` field. Verifiers MUST accept the event with the latest `upgraded_at` and `status === "confirmed"` when multiple conflict.
+When an OTS proof is upgraded from pending to confirmed, any party (signer, aggregator, archival crawler) MAY republish the envelope with the updated `ots` field.
+
+When several events carry the same envelope `id` with different `ots`, a verifier MUST choose by verified anchor, never by `upgraded_at`: `ots` sits outside the signature, and whoever republishes sets `upgraded_at`, `block_height` and `block_hash`.
+
+1. Verify each candidate (§8), checking its anchor per §6.3.
+2. For each candidate, the height that counts is that of the earliest Bitcoin attestation in its proof that the verifier itself walked to a checked block header. The declared `block_height` is ignored where it disagrees.
+3. Among candidates with a verified anchor, take the one with the lowest such height: the earliest block that proves the `id` existed.
+4. If no candidate's anchor verifies, none is confirmed. A declared anchor counts only as claimed, and a pending one as pending.
+
+Every candidate carries the same signed fields, so the choice never changes who signed or what was signed. One `id` submitted to two calendars can honestly anchor in two different blocks; its priority is the earlier one that checks out.
+
+> **Errata (1.0.5).** This section chose by the latest `upgraded_at`. It now chooses by verified anchor.
 
 ### 7.3 Reading relay replies
 

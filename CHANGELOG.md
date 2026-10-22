@@ -6,6 +6,17 @@
 
 - **Reference relay set** (§7): names the relays the reference app now uses. `relay.snort.social` and `offchain.pub` left it on 2026-10-21: snort kept none of the family events it accepted, and offchain refused events signed by fresh keys. `relay.damus.io` and `nostr.oxtr.dev` joined. Non-normative; nothing a client MUST do changes.
 
+## [1.0.5] — 2026-10-22 — errata: choosing between republished copies
+
+**Errata release. No envelope, canonical-message or signature change, and no
+id changes.**
+
+- **§7.2.** Between events that carry the same `id` with different `ots`, a
+  verifier chooses by verified anchor: the copy whose proof it walks to the
+  earliest checked block header. The height is derived from the proof, not read
+  from the declared `block_height`, and `upgraded_at` plays no part. With no
+  verified anchor, no copy is confirmed.
+
 ## [1.0.4] — 2026-10-21 — errata: one timestamp form, and which bytes end in LF
 
 **Errata release. No envelope, canonical-message or signature change, and no
