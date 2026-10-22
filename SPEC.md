@@ -364,6 +364,7 @@ Given an envelope `E` and optionally a block headers source:
    a. Parse `E.ots.proof`.
    b. Walk the Merkle path from `id` to the declared block's Merkle root.
    c. Fetch the block header at `E.ots.block_height` (or use the provided headers bundle). If it does not hash to `E.ots.block_hash`, or its Merkle root differs from the walked root → `E_BAD_ANCHOR`.
+   d. If the header cannot be read (the source fails or does not answer), the anchor is **unchecked**: report the envelope as signed, claiming an anchor at `E.ots.block_height`, and check again later. `E_BAD_ANCHOR` is reported only after the header has been read.
 6. **Content check.** If the caller has the content bytes, compute `H(bytes)` and compare to `E.content.hash`. If mismatch → `E_BAD_CONTENT`.
 7. **Stake check (optional).** If the caller has a stake policy: if `E.stake` is absent → `E_STAKE_UNMET`. Otherwise resolve `E.stake.attestation_id` against current chain state (for example `@orangecheck/sdk#verify`) and require all of:
    a. the attestation resolves, and its id is `E.stake.attestation_id`;
@@ -401,7 +402,7 @@ Client errors MUST use these codes. Users see short human-readable messages; log
 | `E_MALFORMED` | Envelope shape / field types / required fields invalid. |
 | `E_BAD_ID` | Reconstructed canonical message does not hash to the declared `id`. |
 | `E_BAD_SIG` | BIP-322 signature did not verify. |
-| `E_BAD_ANCHOR` | OTS proof does not chain to the declared Bitcoin block header. |
+| `E_BAD_ANCHOR` | OTS proof does not chain to the declared Bitcoin block header, once that header has been read. A header that could not be read leaves the anchor unchecked (§8.1 step 5d). |
 | `E_NO_ANCHOR` | Policy requires a confirmed OTS anchor; envelope has `pending` or missing `ots`. |
 | `E_BAD_CONTENT` | Provided content bytes hash does not match `content.hash`. |
 | `E_STAKE_UNMET` | Signer's OrangeCheck attestation does not meet the caller's threshold. |

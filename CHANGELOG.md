@@ -6,6 +6,19 @@
 
 - **Reference relay set** (§7): names the relays the reference app now uses. `relay.snort.social` and `offchain.pub` left it on 2026-10-21: snort kept none of the family events it accepted, and offchain refused events signed by fresh keys. `relay.damus.io` and `nostr.oxtr.dev` joined. Non-normative; nothing a client MUST do changes.
 
+## [1.0.6] — 2026-10-22 — errata: an anchor that could not be checked
+
+**Errata release. No envelope, canonical-message or signature change, and no
+id changes.**
+
+- **§8.1 step 5d.** A block header that cannot be read leaves the anchor
+  unchecked: the envelope is reported as signed, claiming an anchor at its
+  declared height, and checked again later.
+- **§10.** `E_BAD_ANCHOR` is reported only after the header has been read.
+
+Reference implementation: `@orangecheck/stamp-core` 1.4.0 (`anchor.status:
+'unchecked'`).
+
 ## [1.0.5] — 2026-10-22 — errata: choosing between republished copies
 
 **Errata release. No envelope, canonical-message or signature change, and no
