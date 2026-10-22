@@ -21,7 +21,7 @@ Each `.json` file in this directory is an independent vector:
     "expected_sig_value": "<base64 placeholder; real signatures are non-deterministic for ECDSA>"
   },
   "expected": {
-    "canonical_message": "<exact LF-terminated bytes as a string>",
+    "canonical_message": "<the exact bytes as a string: lines joined by LF, no trailing LF>",
     "canonical_message_bytes_len": 232,
     "id": "<64-hex SHA-256 of canonical message>",
     "envelope": { "…": "…" }
@@ -74,6 +74,7 @@ New implementations should add a similar test.
 | `v06-stake-stripped.json` | v02 with `stake` removed: same canonical message, id and signature; a stake policy sees no stake (`E_STAKE_UNMET`) |
 | `v07-stake-swapped.json` | v02 with another address's attestation swapped in: same id; the stake check MUST reject it (`E_STAKE_UNMET`) |
 | `v08-stake-own.json` | v02's own attestation, resolved now with values below the declared ones: the stake check accepts on the resolved values |
+| `v09-signed-at-millis.json` | v01 with `signed_at` in §0's millisecond form: the id covers it exactly as written |
 
 ### Stake-check vectors (v06–v08)
 

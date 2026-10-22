@@ -1,0 +1,42 @@
+{
+    "description": "signed_at with milliseconds (§0's .sss form): kept as written, so the id covers the milliseconds",
+    "inputs": {
+        "address": "bc1qalice000000000000000000000000000000000",
+        "content_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "content_length": 42,
+        "content_mime": "text/plain",
+        "signed_at": "2026-04-24T18:30:00.123Z",
+        "content_ref": null,
+        "stake": null,
+        "ots": null,
+        "expected_sig_value": "ZmFrZS1zaWduYXR1cmU="
+    },
+    "expected": {
+        "canonical_message": "oc-stamp:v1\naddress: bc1qalice000000000000000000000000000000000\ncontent_hash: sha256:1111111111111111111111111111111111111111111111111111111111111111\ncontent_length: 42\ncontent_mime: text/plain\nsigned_at: 2026-04-24T18:30:00.123Z",
+        "canonical_message_bytes_len": 229,
+        "id": "1d8d6266bdb6e24c38ff81a2a4ddc1d6a65d97e8a8de7b911da63a783a8cf90d",
+        "envelope": {
+            "v": 1,
+            "kind": "stamp",
+            "id": "1d8d6266bdb6e24c38ff81a2a4ddc1d6a65d97e8a8de7b911da63a783a8cf90d",
+            "content": {
+                "hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+                "length": 42,
+                "mime": "text/plain",
+                "ref": null
+            },
+            "signer": {
+                "address": "bc1qalice000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "signed_at": "2026-04-24T18:30:00.123Z",
+            "stake": null,
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qalice000000000000000000000000000000000",
+                "value": "ZmFrZS1zaWduYXR1cmU="
+            }
+        }
+    }
+}

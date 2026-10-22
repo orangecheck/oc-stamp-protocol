@@ -6,6 +6,32 @@
 
 - **Reference relay set** (§7): names the relays the reference app now uses. `relay.snort.social` and `offchain.pub` left it on 2026-10-21: snort kept none of the family events it accepted, and offchain refused events signed by fresh keys. `relay.damus.io` and `nostr.oxtr.dev` joined. Non-normative; nothing a client MUST do changes.
 
+## [1.0.4] — 2026-10-21 — errata: one timestamp form, and which bytes end in LF
+
+**Errata release. No envelope, canonical-message or signature change, and no
+id changes.** Every existing vector keeps its id. Written from a third-party
+implementation built from the published docs alone.
+
+- **§5 and the id.** §3.1's canonical message (no trailing LF) is what the id
+  hashes. §5's canonical envelope bytes (ending in LF) serialize the envelope
+  and never feed the id. §5 now says so, and that a string form without the LF
+  is the same canonicalization. The vector README called the canonical message
+  "LF-terminated"; it is LF-joined with no trailing LF.
+- **`signed_at` (§0, §3.1, §4.2).** §0 always allowed exactly two forms,
+  `…:SSZ` and `…:SS.sssZ`. It now adds that the instant must exist, that an
+  implementation MUST NOT round, truncate or reformat a timestamp it is given
+  (the id covers it as written), and §4.2 says verifiers MUST reject any other
+  form.
+- **New vector.** v09: `signed_at` with milliseconds.
+- **§6.1.** A client SHOULD treat a submission as made only once two calendars
+  have returned a pending proof. `POST /digest` carries no `Content-Type`.
+- **§6.2 step 4.** `confirmed` only after the header at the attested height has
+  been fetched and compared; without it the status stays `pending`.
+
+Reference implementation: `@orangecheck/stamp-core` 1.3.0 (`parseStamp`, one
+`signed_at` rule) and `@orangecheck/stamp-ots` 0.4.0 (two calendars by default,
+`headerSource` required).
+
 ## [1.0.3] — 2026-10-21 — errata: the stake is not signed
 
 **Errata release. No envelope, canonical-message or signature change, and no

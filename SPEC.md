@@ -14,7 +14,7 @@
 - `BIP322(addr, msg)` = BIP-322 signature of `msg` by `addr`, encoded as base64.
 - `OTS(h)` = an OpenTimestamps proof committing to the 32-byte hash `h`. A proof is either `pending` (only a calendar commitment) or `confirmed` (a Merkle path rooted in a specific Bitcoin block header). Format per [OpenTimestamps Client Spec](https://github.com/opentimestamps/python-opentimestamps).
 - Canonical JSON = UTF-8 encoded JSON with lexicographically sorted object keys, no insignificant whitespace, LF-terminated. See §5.
-- ISO 8601 UTC means `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.sssZ`, always ending in `Z`.
+- ISO 8601 UTC means `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.sssZ` (exactly three fractional digits), always ending in `Z`, naming a real instant. Implementations MUST NOT round, truncate or reformat a timestamp they are given: `signed_at` is hashed into the id exactly as written (§3.1), so a rewrite is a different id.
 
 ## 1. Actors
 
@@ -44,7 +44,7 @@ address: <btc_address>
 content_hash: sha256:<64-hex>
 content_length: <positive integer, decimal>
 content_mime: <RFC 6838 media type; "application/octet-stream" if unknown>
-signed_at: <ISO 8601 UTC>
+signed_at: <ISO 8601 UTC, §0>
 ```
 
 Each line is terminated by a single LF (`0x0a`). There is no trailing LF after the `signed_at` line. The first line is the literal 11-byte string `oc-stamp:v1` — a domain separator that commits future incompatible changes to explicit version bumps (§9).
@@ -129,7 +129,7 @@ A stamp is a single canonical JSON object called the **envelope**. It is referre
 | `content.ref` | Optional pointer to content. `null`, `ipfs://…`, `https://…`, or a `magnet:` URI. Not cryptographic; content authenticity is proven by `content.hash`. |
 | `signer.address` | MUST match `address` in the canonical message. |
 | `signer.alg` | MUST equal `"bip322"` in v1. |
-| `signed_at` | MUST match `signed_at` in the canonical message. |
+| `signed_at` | MUST match `signed_at` in the canonical message. One of §0's two forms; verifiers MUST reject any other. |
 | `stake` | Optional. If present, `sats_bonded` MUST be a non-negative integer; `days_unspent` MUST be a non-negative integer. `attestation_id` SHOULD be the sha256 of an OrangeCheck canonical message signed by `signer.address`. Not in the canonical message, so not covered by `id` or `sig.value` (§2). |
 | `ots` | See §6. `null` is permitted for "signed but not yet anchored" envelopes; verifiers MAY reject envelopes without `ots` depending on policy. |
 | `sig.alg` | MUST equal `"bip322"` in v1. |
@@ -174,6 +174,8 @@ Canonical form:
 - Strings serialized with `\uXXXX` escapes only for control characters and `"` / `\`; all other codepoints literal.
 - Final byte is LF (`0x0a`).
 
+These bytes serialize the envelope; they never feed the id. The id is `H` of the canonical message (§3.1), which has no trailing LF. An implementation that returns the canonical JSON as a string without the final LF has the same canonicalization; the LF belongs to the byte form.
+
 Reference: [RFC 8785 JSON Canonicalization Scheme](https://www.rfc-editor.org/rfc/rfc8785).
 
 Unlike OC Lock, OC Stamp envelopes contain no array field that requires stable per-element sorting. RFC 8785 alone is sufficient.
@@ -203,7 +205,9 @@ The calendar returns a **pending proof** — a commitment to a calendar-internal
 }
 ```
 
-Clients SHOULD submit to at least two calendars operated by different parties. A stamp with only one calendar commitment is a single point of failure for upgrade liveness.
+Clients SHOULD submit to at least two calendars operated by different parties, and SHOULD treat the submission as made only once at least two have returned a pending proof. A stamp with only one calendar commitment is a single point of failure for upgrade liveness.
+
+`POST <calendar>/digest` carries the raw 32 bytes as the body and no `Content-Type` header. A type outside the CORS-safelisted ones makes a browser send a preflight, which the public calendars refuse.
 
 ### 6.2 Upgrade
 
@@ -214,7 +218,7 @@ Any client (the signer, a verifier, or an archival service) MAY fetch the upgrad
 1. Walk `ots.proof` from `id` to each pending calendar attestation. The message at that attestation is the **commitment** the calendar indexes; it is not `id`.
 2. GET `<calendar>/timestamp/<hex(commitment)>`. A 404 means the calendar has not anchored it yet. Clients SHOULD only contact calendars listed in `ots.calendars`.
 3. Merge the returned timestamp (rooted at the commitment) into the proof at that attestation, and replace `ots.proof` with the merged proof.
-4. When the merged proof reaches a Bitcoin attestation, set `block_height` from it and `block_hash` from the header at that height whose Merkle root equals the attested message; set `status = "confirmed"`, `upgraded_at = now`.
+4. When the merged proof reaches a Bitcoin attestation, set `block_height` from it and `block_hash` from the header at that height whose Merkle root equals the attested message; set `status = "confirmed"`, `upgraded_at = now`. A client that has not fetched and compared that header MUST leave `status` as `"pending"`: it MUST NOT set `"confirmed"` from the proof alone.
 
 The upgrade rewrites `ots` but does not change `id`, `sig`, or any other field. The signature domain does not include `ots`, so the upgrade is cryptographically independent of the BIP-322 commitment.
 
