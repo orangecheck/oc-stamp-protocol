@@ -2,7 +2,7 @@
 
 **Status:** Stable
 **Date:** 2026-04
-**Related:** [OrangeCheck](https://ochk.io/docs/spec) (identity + stake), [OC Lock v2](https://github.com/orangecheck/oc-lock-protocol) (private envelopes), [OpenTimestamps](https://opentimestamps.org) (block-anchored priority)
+**Related:** [OC Attest](https://ochk.io/docs/attest) (identity + stake), [OC Lock v2](https://github.com/orangecheck/oc-lock-protocol) (private envelopes), [OpenTimestamps](https://opentimestamps.org) (block-anchored priority)
 
 ---
 
