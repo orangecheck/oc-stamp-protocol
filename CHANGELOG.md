@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Fixed — 2026-10-28
+
+- **§3.1.** `content_length` is a non-negative integer, as §4.2's field rule
+  already says and the reference stamp-core accepts, so a zero-byte file can
+  be stamped. §3.1's format line read "positive". No canonical-message, id or
+  signature change.
+
 ### Fixed — 2026-10-21
 
 - **Reference relay set** (§7): names the relays the reference app now uses. `relay.snort.social` and `offchain.pub` left it on 2026-10-21: snort kept none of the family events it accepted, and offchain refused events signed by fresh keys. `relay.damus.io` and `nostr.oxtr.dev` joined. Non-normative; nothing a client MUST do changes.

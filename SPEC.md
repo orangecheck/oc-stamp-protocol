@@ -42,7 +42,7 @@ The **canonical message** is the exact byte sequence hashed to produce the envel
 oc-stamp:v1
 address: <btc_address>
 content_hash: sha256:<64-hex>
-content_length: <positive integer, decimal>
+content_length: <non-negative integer, decimal>
 content_mime: <RFC 6838 media type; "application/octet-stream" if unknown>
 signed_at: <ISO 8601 UTC, §0>
 ```
