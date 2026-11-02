@@ -341,7 +341,7 @@ A relay has **answered** a query only when it sent `EOSE` for that subscription 
 - no `EOSE` before the client's deadline;
 - an event that does not satisfy the filter, which shows the relay did not apply it.
 
-Not hearing back MUST NOT be treated as evidence that no stamp exists. A reader MAY report that no stamp matches only from relays that answered, and only for stamps carrying the tag it asked for (see "Older events", §7.1). If no relay answered, the reader has not looked, and MUST NOT report that the content is unstamped. An event a relay returns is a candidate, never a verdict: check it against what you asked for and verify it (§8) before using it.
+Not hearing back MUST NOT be treated as evidence that no stamp exists. A reader MAY report that no stamp matches only from relays that answered, and only for stamps carrying the tag it asked for (see "Older events", §7.1). If no relay answered, the reader has not looked, and MUST NOT report that the content is unstamped. An event a relay returns is a candidate, never a verdict: check it against what you asked for and verify it (§8) before using it. A reader MUST also verify each event under NIP-01 (its `id` is the SHA-256 of its serialized fields, and its `sig` verifies for its `pubkey`) before it merges or deduplicates answers across relays, and drop one that fails, so it never takes the place of another relay's copy.
 
 > **Errata (2026-10-20).** This section is new. The rule matches OC Agent `SPEC.md` §10.4.
 

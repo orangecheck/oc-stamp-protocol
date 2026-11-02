@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Changed — 2026-11-02
+
+- **§7.3.** A reader verifies each event under NIP-01 before it merges or
+  deduplicates answers across relays, and drops one that fails, so a relay
+  serving junk under another event's id cannot displace that stamp. No
+  canonical-message, id or signature change.
+
 ### Fixed — 2026-10-28
 
 - **§3.1.** `content_length` is a non-negative integer, as §4.2's field rule
