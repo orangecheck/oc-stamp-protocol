@@ -4,6 +4,9 @@
 
 ### Changed — 2026-11-02
 
+- **§7.** A client keeps publishing a stamp until at least two of the relays
+  readers ask, each asked alone, serve back a copy that verifies (every one,
+  when they ask fewer than two), and reports it as published only then.
 - **§7.3.** A reader verifies each event under NIP-01 before it merges or
   deduplicates answers across relays, and drops one that fails, so a relay
   serving junk under another event's id cannot displace that stamp. No
