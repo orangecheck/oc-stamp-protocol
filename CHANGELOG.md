@@ -8,6 +8,9 @@
   deduplicates answers across relays, and drops one that fails, so a relay
   serving junk under another event's id cannot displace that stamp. No
   canonical-message, id or signature change.
+- **§7.2.** A stamp's `id` covers neither its signature nor its OTS proof,
+  so copies are never collapsed by `id` before they are verified: a reader
+  considers each copy and uses one that verifies.
 
 ### Fixed — 2026-10-28
 

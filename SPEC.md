@@ -328,6 +328,8 @@ When several events carry the same envelope `id` with different `ots`, a verifie
 
 Every candidate carries the same signed fields, so the choice never changes who signed or what was signed. One `id` submitted to two calendars can honestly anchor in two different blocks; its priority is the earlier one that checks out.
 
+Copies are never collapsed by `id` before this: a stamp's `id` covers neither its BIP-322 signature nor its OTS proof, so a reader considers each copy and uses one that verifies (§8), and a copy that fails never takes the place of one that passes.
+
 > **Errata (1.0.5).** This section chose by the latest `upgraded_at`. It now chooses by verified anchor.
 
 ### 7.3 Reading relay replies
