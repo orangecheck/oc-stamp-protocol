@@ -251,7 +251,7 @@ The reference aggregator at `stamp.ochk.io` is open-source and replaceable. A si
 
 For durable public discovery, stamps MAY be published to Nostr as **kind-30083** (addressable, replaceable) events.
 
-Kind 30083 is **co-claimed** with [OC Agent](https://github.com/orangecheck/oc-agent-protocol) within the OrangeCheck family's 30078–30099 range. OC Stamp publishes stamp envelopes; OC Agent publishes delegation envelopes. The two are unambiguously distinguished by the `d` tag namespace:
+Kind 30083 is **co-claimed** with [OC Agent](https://github.com/orangecheck/oc-agent-protocol) within the OrangeCheck family's 30078–30115 range (the family's kind registry is public at [ochk.io/docs/ecosystem/nostr-kind-30078](https://ochk.io/docs/ecosystem/nostr-kind-30078)). OC Stamp publishes stamp envelopes; OC Agent publishes delegation envelopes. The two are unambiguously distinguished by the `d` tag namespace:
 
 | Sub-protocol | `d` tag prefix | Envelope `kind` field |
 |---|---|---|

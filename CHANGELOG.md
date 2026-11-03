@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed — 2026-11-03
+
+- **§7.** The family's kind range is 30078–30115 (OC Chat claims
+  30110–30115), not 30078–30099, and the line links the public family
+  registry. No kind or `d`-tag change.
+
 ### Changed — 2026-11-02
 
 - **§7.** A client keeps publishing a stamp until at least two of the relays
