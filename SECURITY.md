@@ -13,7 +13,7 @@ We aim to reply to every report within 30 days. We can't promise a time to a fix
 
 ## Scope
 
-This document covers the **OC Stamp v1 protocol specification** in this repository. The reference implementation lives in [`orangecheck/oc-packages`](https://github.com/orangecheck/oc-packages) and has its own `SECURITY.md`. The hosted reference web client at [stamp.ochk.io](https://stamp.ochk.io) is closed-source; report web-client security issues via `security@ochk.io`.
+This document covers the **OC Stamp v1 protocol specification** in this repository. The reference implementation lives in [`orangecheck/oc-packages`](https://github.com/orangecheck/oc-packages); report issues in it to `security@ochk.io` too. The hosted reference web client at [stamp.ochk.io](https://stamp.ochk.io) is closed-source; report web-client security issues via `security@ochk.io`.
 
 ## Threat model
 
@@ -107,16 +107,14 @@ An aggregator that accepts draft envelopes and batches OTS submissions is truste
 
 ## Dependency posture
 
-The reference implementation intentionally depends on a narrow set of audited libraries:
+The reference implementation depends on one audited library:
 
-| Package | Purpose |
-|---|---|
-| `@noble/hashes` | SHA-256 |
-| `@noble/curves` | secp256k1 Schnorr / ECDSA |
-| `javascript-opentimestamps` | OTS calendar client, proof parser |
-| `bip322-js` | BIP-322 verification |
+| Package | Depends on | Purpose |
+|---|---|---|
+| `@orangecheck/stamp-core` | `@noble/hashes` | SHA-256, canonical message, envelope id, `verify()` |
+| `@orangecheck/stamp-ots` | `@noble/hashes`, `@orangecheck/stamp-core` | OTS calendar client and its own OTS proof parser |
 
-`bip322-js` transitively depends on the `elliptic` library; `elliptic` has known low-severity timing channels in ECDSA (npm advisory 1112030). Our use is verification-only and signatures are bound to the BIP-322 message domain, so the risk is limited to signature-check timing. We accept this in the v1 baseline and plan to migrate to a `@noble`-based BIP-322 verifier when one is available.
+Neither package verifies BIP-322 itself. `verify()` takes the verifier as a hook (`verifyBip322`) and fails closed with `E_BAD_SIG` without one; stamp-core's README plugs in [`@orangecheck/bip322`](https://www.npmjs.com/package/@orangecheck/bip322), which is built on `@noble/curves` and `@noble/hashes`. The OTS anchor check is a hook too (`verifyOtsAnchor`, from stamp-ots's `makeAnchorVerifier`).
 
 ## Report a protocol-level concern
 
