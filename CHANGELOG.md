@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed — 2026-11-07
+
+- **Reference relay set** (§7): names `nostr.mom` in place of `relay.damus.io`, as `@orangecheck/nostr-core` 0.8.2's default set does and the reference app now uses. Non-normative; nothing a client MUST do changes.
+
 ### Changed — 2026-11-03
 
 - **§7.** The family's kind range is 30078–30115 (OC Chat claims
