@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed — 2026-11-11
+
+- **§2** names P2SH-P2WPKH among signer addresses, as §8.1 step 4 already accepts and v11 signs. **§11.3** (and SECURITY.md) names the four types §2 lists and the vectors that carry them, and says `@orangecheck/bip322` checks P2TR on the key path and not P2WSH. No canonical-message, id or signature change.
+
 ### Added — 2026-11-11
 
 - **Signature vectors** v10–v14: v01's content signed by one disclosed burn key per address type (P2PKH in BIP-137 form; P2SH-P2WPKH, P2WPKH and P2TR in BIP-322 simple form), each MUST verify, plus v12 with one signature byte flipped, which MUST NOT (`E_BAD_SIG`). Each carries a `signature_check` block; `test-vectors/generate-signatures.mjs` writes them. Non-normative; nothing a client MUST do changes.

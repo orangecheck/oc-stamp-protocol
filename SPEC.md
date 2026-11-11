@@ -28,7 +28,7 @@ A signer MAY verify their own stamps; a verifier MAY be the signer.
 
 ## 2. Identities
 
-A signer is identified by a **mainnet Bitcoin address** (P2WPKH, P2TR, or P2PKH). The address is the full identity: there are no usernames, keyservers, or accounts in the protocol.
+A signer is identified by a **mainnet Bitcoin address** (P2WPKH, P2SH-P2WPKH, P2TR, or P2PKH). The address is the full identity: there are no usernames, keyservers, or accounts in the protocol.
 
 A stamp MAY include an optional **OrangeCheck attestation reference** (`stake.attestation_id`) pointing at a declared sats-bonded × days-unspent signal. The reference is **self-declared** and **re-verifiable**, and it is **not signed**: `stake` is outside the canonical message (§3.1), so it is outside the id and the signature, and anyone who handles the envelope can add, remove or change it without breaking verification. A verifier that cares about stake MUST re-resolve the attestation against current chain state rather than trusting the declared values, and MUST check that the attestation was signed by `signer.address` (§8.1 step 7).
 
@@ -430,7 +430,7 @@ Client errors MUST use these codes. Users see short human-readable messages; log
 ### 11.3 Trust assumptions
 
 - **Bitcoin's security model holds.** ECDSA / Schnorr over secp256k1 remains unforgeable at current parameter sizes.
-- **BIP-322 is implemented correctly** by both signing and verifying clients. Implementations should pin a verifier to a version known to handle all address types (P2WPKH, P2TR, P2WSH, P2PKH).
+- **BIP-322 is implemented correctly** by both signing and verifying clients. Implementations should pin a verifier to a version known to handle each address type in §2 (P2WPKH, P2SH-P2WPKH, P2TR, P2PKH); test vectors v10–v13 carry one real signature for each. `@orangecheck/bip322`, the verifier the reference packages use, checks a P2TR signature on the key path only and does not check P2WSH.
 - **OTS calendars do not backdate.** Calendars cannot anchor an id to a block earlier than the one they submitted into; a collusion between a calendar and a Bitcoin miner to backdate would require rewriting the chain. Using multiple independently-operated calendars further reduces the risk.
 - **Bitcoin block headers are available to the verifier.** Full nodes, SPV clients, and pre-computed header bundles all suffice.
 

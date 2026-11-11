@@ -36,7 +36,7 @@ This document covers the **OC Stamp v1 protocol specification** in this reposito
 ### Assumptions the protocol makes
 
 - **Bitcoin's security model holds.** ECDSA / Schnorr over secp256k1 remains unforgeable at current parameter sizes; the work-weighted longest chain is canonical.
-- **BIP-322 is implemented correctly** by both signing and verifying clients. Implementations should pin a verifier to a version known to handle all address types (P2WPKH, P2TR, P2WSH, P2PKH).
+- **BIP-322 is implemented correctly** by both signing and verifying clients. Implementations should pin a verifier to a version known to handle each address type in SPEC §2 (P2WPKH, P2SH-P2WPKH, P2TR, P2PKH); test vectors v10–v13 carry one real signature for each. `@orangecheck/bip322`, the verifier the reference packages use, checks a P2TR signature on the key path only and does not check P2WSH.
 - **At least one OTS calendar is non-colluding.** Submitting to two or more independently-operated calendars reduces the risk of a calendar-operator collusion with a miner to backdate.
 - **SHA-256 is collision-resistant.** A practical SHA-256 collision breaks `id` uniqueness and therefore many downstream guarantees.
 - **Randomness at signing time is strong** for any ephemeral values used by the signing wallet.
@@ -88,7 +88,7 @@ Each scenario is labeled **Mitigated**, **Partially mitigated**, **Accepted**, o
 
 12. **Key compromise of the signer's Bitcoin private key.** An attacker with the key can forge arbitrary stamps indistinguishable from legitimate ones. *Accepted*: this is the same trust model as BIP-322 everywhere. Key rotation to a new address is the mitigation; past stamps remain valid because the anchor commits to historical state.
 
-13. **BIP-322 verifier bug on exotic address types.** A verifier fails on P2TR, P2WSH, or legacy P2PKH inputs. *Partially mitigated*: SPEC §11.3 requires implementations pin a verifier known to handle all address types. CI conformance testing across verifiers is recommended.
+13. **BIP-322 verifier bug on exotic address types.** A verifier fails on P2TR, P2SH-P2WPKH, or legacy P2PKH inputs. *Partially mitigated*: SPEC §11.3 requires implementations pin a verifier known to handle each address type in SPEC §2, and test vectors v10–v14 give one real signature per type and one that must fail. CI conformance testing across verifiers is recommended.
 
 14. **Malicious Nostr relay returns a manipulated envelope.** *Mitigated*: verifiers re-derive `id` from the canonical message and re-check BIP-322. Manipulated envelopes fail verification regardless of relay.
 
