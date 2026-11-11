@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added — 2026-11-11
+
+- **Signature vectors** v10–v14: v01's content signed by one disclosed burn key per address type (P2PKH in BIP-137 form; P2SH-P2WPKH, P2WPKH and P2TR in BIP-322 simple form), each MUST verify, plus v12 with one signature byte flipped, which MUST NOT (`E_BAD_SIG`). Each carries a `signature_check` block; `test-vectors/generate-signatures.mjs` writes them. Non-normative; nothing a client MUST do changes.
+
 ### Changed — 2026-11-07
 
 - **Reference relay set** (§7): names `nostr.mom` in place of `relay.damus.io`, as `@orangecheck/nostr-core` 0.8.2's default set does and the reference app now uses. Non-normative; nothing a client MUST do changes.
