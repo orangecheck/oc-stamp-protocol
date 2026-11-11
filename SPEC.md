@@ -272,12 +272,14 @@ event.tags       = [
   ["t", content.hash],
   ["t", "oc-stamp"]
 ]
-event.content    = <canonical JSON of envelope>
+event.content    = <envelope as JSON; SHOULD be its canonical JSON (§5)>
 event.pubkey     = ephemeral_nostr_pubkey (any Nostr key)
 event.created_at = unix_seconds
 ```
 
 Discovery tags are `t` tags because relays index only single-letter tag names (NIP-01); a filter on a multi-letter tag returns nothing, and some relays (strfry) close the subscription outright. Publishers MAY add further tags. Tags are unsigned relay metadata: a verifier MUST NOT rely on them and reads the address and hash from the envelope in `content`.
+
+`event.content` is the envelope as JSON. A publisher SHOULD write its canonical JSON (§5). A reader MUST parse the content and recompute the id from the envelope's fields (§3.1, §8 step 3), and MUST NOT hash the bytes of `event.content`: an envelope on a relay can differ from its canonical JSON in key order, whitespace or the final LF and still be the same envelope.
 
 The Nostr event `pubkey` has no relationship to the Bitcoin identity — the authenticity of the stamp is proven by the BIP-322 signature inside the envelope, not by the Nostr author. A fresh ephemeral Nostr keypair SHOULD be derived per-publish:
 

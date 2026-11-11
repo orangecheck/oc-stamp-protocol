@@ -4,6 +4,7 @@
 
 ### Changed — 2026-11-11
 
+- **§7 event content.** An event's content is the envelope as JSON, and a publisher SHOULD write its canonical JSON (§5). A reader parses the content and recomputes the id from the fields, and does not hash the bytes of the content, so content that differs from the canonical JSON in key order, whitespace or the final LF is still the same envelope. Nothing already published becomes non-conformant.
 - **§2** names P2SH-P2WPKH among signer addresses, as §8.1 step 4 already accepts and v11 signs. **§11.3** (and SECURITY.md) names the four types §2 lists and the vectors that carry them, and says `@orangecheck/bip322` checks P2TR on the key path and not P2WSH. No canonical-message, id or signature change.
 
 ### Added — 2026-11-11
